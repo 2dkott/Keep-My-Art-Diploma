@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <title>Hello world!</title>
+    <style>
+        button {
+            --pico-border-width: 0;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+<main class="container">
+    <nav>
+        <ul>
+            <li><a href="#">Project</a></li>
+            <li><a href="#">Resources</a></li>
+        </ul>
+    </nav>
+    <section class="pico">
+        <form>
+            <label for="project-name">1. Добавьте имя Вашего проекта:
+                <input id="project-name"
+                       type="text"
+                       name="project-name"
+                       placeholder="Имя Вашего Проекта"
+                       aria-label="Project Local Path"
+                       required
+                />
+            <label for="local-path-input">2. Вставьте путь к Вашему проекту
+            <input id="local-path-input"
+                    type="text"
+                    name="local-path"
+                    placeholder="Путь к Вашему проекту"
+                    aria-label="Project Local Path"
+                    required
+            />
+            </label>
+            <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище
+                <fieldset id="cloud-source-group">
+                    <button class="outline" type="button">YANDEX DISK</button>
+                    <button class="outline" type="button">GOOGLE DISK</button>
+                    <div></div>
+                </fieldset>
+            </label>
+            <button type="submit">Subscribe</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>
