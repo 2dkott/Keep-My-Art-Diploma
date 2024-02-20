@@ -5,14 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark" />
     <link rel="stylesheet" th:href="@{/css/pico.min.css}">
-    <title>Hello world!</title>
+    <title>New Project</title>
     <style>
-        button {
+        .outline {
             --pico-border-width: 0;
             border-radius: 0.5rem;
+            margin-bottom: 0;
+        }
+        #cloud-source-group {
+            margin-bottom: 0;
+        }
+        #form-button-fieldset {
+            width: 100px;
         }
     </style>
+
 </head>
+<script type = "text/javascript">
+    function validate() {
+
+        if( document.getElementById("cloud-source-list").getElementsByTagName("li").length === 0 ) {
+            document.getElementById("cloud-source-warning").style.display = "block"
+            return false;
+        }
+        document.getElementById("cloud-source-warning").style.display = "none"
+        return( true );
+    }
+</script>
 <body>
 <main class="container">
     <nav>
@@ -22,7 +41,7 @@
         </ul>
     </nav>
     <section class="pico">
-        <form>
+        <form name = "newProjectForm" onsubmit="return validate()">
             <label for="project-name">1. Добавьте имя Вашего проекта:
                 <input id="project-name"
                        type="text"
@@ -30,24 +49,36 @@
                        placeholder="Имя Вашего Проекта"
                        aria-label="Project Local Path"
                        required
+                       minlength="3"
                 />
+            </label>
             <label for="local-path-input">2. Вставьте путь к Вашему проекту
             <input id="local-path-input"
-                    type="text"
-                    name="local-path"
-                    placeholder="Путь к Вашему проекту"
-                    aria-label="Project Local Path"
-                    required
+                   type="text"
+                   name="local-path"
+                   placeholder="Путь к Вашему проекту"
+                   aria-label="Project Local Path"
+                   required
+                   minlength="3"
+                   pattern="^(?:[a-zA-Z]:|(\\\\|\/\/)).*"
             />
             </label>
             <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище
                 <fieldset id="cloud-source-group">
                     <button class="outline" type="button">YANDEX DISK</button>
                     <button class="outline" type="button">GOOGLE DISK</button>
-                    <div></div>
                 </fieldset>
+                <ul id="cloud-source-list">
+                </ul>
+                <article id="cloud-source-warning" style="display: none">
+                    <h2>Внимание</h2>
+                    <p> Добавьте Облачное хранилище! </p>
+                </article>
             </label>
-            <button type="submit">Subscribe</button>
+            <fieldset role="group" id="form-button-fieldset">
+                <button type="submit">Создать</button>
+                <button type="reset">Отмена</button>
+            </fieldset>
         </form>
     </section>
 </main>
