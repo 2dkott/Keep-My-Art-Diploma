@@ -65,7 +65,7 @@
             </label>
             <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище
                 <fieldset id="cloud-source-group">
-                    <button class="outline" type="button">YANDEX DISK</button>
+                    <button class="outline" type="button" th:attr="onclick=|window.open('${yandexOauthUrl}', '_self')|" >YANDEX DISK</button>
                     <button class="outline" type="button">GOOGLE DISK</button>
                 </fieldset>
                 <ul id="cloud-source-list">
