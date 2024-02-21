@@ -6,6 +6,7 @@ import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.oauth.YandexOauthApi20;
+import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -33,7 +34,8 @@ public class YandexService {
     @Value("${services.api.yandex.scope}")
     private String apiScope;
 
-    public YandexService() {
+    @PostConstruct
+    public void init() {
         this.service = new ServiceBuilder(apiKey)
                 .apiSecret(apiSecret)
                 .defaultScope(apiScope)
@@ -41,7 +43,7 @@ public class YandexService {
                 .build(YandexOauthApi20.instance());
     }
 
-    public void doOauth(@NonNull String code) throws IOException, ExecutionException, InterruptedException {
+    public void doOauth(String code) throws IOException, ExecutionException, InterruptedException {
         accessToken = service.getAccessToken(code);
     }
 
