@@ -33,7 +33,7 @@ public class YandexService {
     @Value("${services.api.yandex.scope}")
     private String apiScope;
 
-    public YandexService(){
+    public YandexService() {
         this.service = new ServiceBuilder(apiKey)
                 .apiSecret(apiSecret)
                 .defaultScope(apiScope)
