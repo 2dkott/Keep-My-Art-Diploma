@@ -4,9 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
+@Table(name = "keepFiles")
 public class KeepFile {
 
     @Id
@@ -16,9 +18,11 @@ public class KeepFile {
     @Column
     private String name;
 
-    @Column
-    @OneToOne
+    @ManyToOne
     private KeepFile parent;
+
+    @OneToMany(mappedBy="parent")
+    private List<KeepFile> children;
 
     @Column
     private LocalDateTime creationTime;

@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "keepSources")
 public class KeepSource {
 
     @Id
@@ -22,4 +23,8 @@ public class KeepSource {
 
     @Column
     private String userToken;
+
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private KeepProject project;
 }
