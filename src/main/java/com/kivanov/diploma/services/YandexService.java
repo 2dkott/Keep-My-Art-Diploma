@@ -7,6 +7,8 @@ import com.google.gson.Gson;
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.oauth.YandexOauthApi20;
 import lombok.NonNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
@@ -17,14 +19,24 @@ import java.net.URLConnection;
 import java.util.concurrent.ExecutionException;
 
 
+@Component
 public class YandexService {
     OAuth20Service service;
     OAuth2AccessToken accessToken;
 
+    @Value("${services.api.yandex.key}")
+    private String apiKey;
+
+    @Value("${services.api.yandex.secret}")
+    private String apiSecret;
+
+    @Value("${services.api.yandex.scope}")
+    private String apiScope;
+
     public YandexService(){
-        this.service = new ServiceBuilder("cbbe4732e7f64509b2c72f06e75b15cf")
-                .apiSecret("39142b3043a14d59951ee3fec132a5a3")
-                .defaultScope("cloud_api:disk.read")
+        this.service = new ServiceBuilder(apiKey)
+                .apiSecret(apiSecret)
+                .defaultScope(apiScope)
                 .callback("http://localhost:8080/" + WebUrls.OAUTH2_YANDEX)
                 .build(YandexOauthApi20.instance());
     }
