@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -31,6 +31,11 @@
         document.getElementById("cloud-source-warning").style.display = "none"
         return( true );
     }
+
+    function goto( oauthUrl ) {
+        $("*{project.name}").val()=document.getElementById("project-name").value;
+        window.open(oauthUrl);
+    }
 </script>
 <body>
 <main class="container">
@@ -41,7 +46,7 @@
         </ul>
     </nav>
     <section class="pico">
-        <form name = "newProjectForm" onsubmit="return validate()">
+        <form name = "newProjectForm" onsubmit="return validate()" action="#" th:action="@{/project/register}" method="post">
             <label for="project-name">1. Добавьте имя Вашего проекта:
                 <input id="project-name"
                        type="text"
@@ -50,6 +55,7 @@
                        aria-label="Project Local Path"
                        required
                        minlength="3"
+                       th:field="*{project.name}"
                 />
             </label>
             <label for="local-path-input">2. Вставьте путь к Вашему проекту
@@ -61,14 +67,16 @@
                    required
                    minlength="3"
                    pattern="^(?:[a-zA-Z]:|(\\\\|\/\/)).*"
+                   th:field="*{localSource.path}"
             />
             </label>
             <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище
                 <fieldset id="cloud-source-group">
-                    <button class="outline" type="button" th:attr="onclick=|window.open('${yandexOauthUrl}', '_self')|" >YANDEX DISK</button>
+                    <button class="outline" type="button" th:attr="onclick=|goto('${yandexOauthUrl}')|" >YANDEX DISK</button>
                     <button class="outline" type="button">GOOGLE DISK</button>
                 </fieldset>
-                <ul id="cloud-source-list">
+                <ul id="cloud-source-list" th:each="keepSource : ${keepSources}">
+                    <li th:if="${keepSource.isCloud()}" th:text="${keepSource.getUserName()}"></li>
                 </ul>
                 <article id="cloud-source-warning" style="display: none">
                     <h2>Внимание</h2>
