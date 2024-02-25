@@ -1,5 +1,6 @@
 package com.kivanov.diploma.contollers;
 
+import com.kivanov.diploma.model.KeepProject;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.YandexService;
@@ -18,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 
 @Controller
 @RequestMapping("/" + WebUrls.OAUTH2)
-@SessionAttributes({"keepSources", "project", "localSource"})
+@SessionAttributes({"newProjectSession"})
 public class OauthController {
 
     @Autowired
@@ -26,8 +27,7 @@ public class OauthController {
 
     @GetMapping("/" + WebUrls.YANDEX)
     public RedirectView getAuthCodeFromYandex(@RequestParam("code") String code,
-                                        @ModelAttribute("keepSources") List<KeepSource> keepSources,
-                                        RedirectAttributes attributes) throws IOException, ExecutionException, InterruptedException {
+                                              @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) throws IOException, ExecutionException, InterruptedException {
 
         yandexService.doOauth(code);
         YandexUserInfo yandexUserInfo = yandexService.getUserInfo(yandexService.getOauthToken());
@@ -36,13 +36,19 @@ public class OauthController {
         keepSource.setUserToken(yandexService.getOauthToken());
         keepSource.setUserName(yandexUserInfo.getLogin());
         keepSource.setPath("app:");
-        keepSources.add(keepSource);
+        newProjectSession.getKeepSourceList().add(keepSource);
 
         return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.NEW);
     }
 
-    @ModelAttribute("keepSources")
-    public List<KeepSource> keepSources() {
-        return new ArrayList<>();
+    @PostMapping("/" + WebUrls.REDIRECT + "/{cloud-name}")
+    public RedirectView redirect(@PathVariable("cloud-name") String cloudName, @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) {
+        if (cloudName.equals(WebUrls.YANDEX)) return new RedirectView(yandexService.getAuthorizationUrl());
+        return null;
+    }
+
+    @ModelAttribute("newProjectSession")
+    public NewProjectSession newProjectSession() {
+        return new NewProjectSession();
     }
 }

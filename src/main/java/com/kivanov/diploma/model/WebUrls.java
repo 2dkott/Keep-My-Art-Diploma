@@ -2,6 +2,7 @@ package com.kivanov.diploma.model;
 
 public class WebUrls {
     final static public String PROJECT = "project";
+    final static public String REDIRECT = "redirect";
     final static public String NEW = "new";
     final static public String REGISTER = "register";
     final static public String OAUTH2 = "oauth2";

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark" />
+    <meta name="color-scheme" content="light dark"/>
     <link rel="stylesheet" th:href="@{/css/pico.min.css}">
     <title>New Project</title>
     <style>
@@ -12,30 +12,40 @@
             border-radius: 0.5rem;
             margin-bottom: 0;
         }
+
         #cloud-source-group {
             margin-bottom: 0;
         }
+
         #form-button-fieldset {
             width: 100px;
         }
-    </style>
 
-</head>
-<script type = "text/javascript">
-    function validate() {
-
-        if( document.getElementById("cloud-source-list").getElementsByTagName("li").length === 0 ) {
-            document.getElementById("cloud-source-warning").style.display = "block"
-            return false;
+        .invalid_input {
+            background-image: var(--pico-icon-invalid);
+            --pico-border-color: var(--pico-form-element-invalid-border-color);
+            padding-right: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
+            padding-left: var(--pico-form-element-spacing-horizontal);
+            padding-inline-start: var(--pico-form-element-spacing-horizontal) !important;
+            padding-inline-end: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
+            background-position: center right 0.75rem;
+            background-size: 1rem auto;
+            background-repeat: no-repeat;
         }
-        document.getElementById("cloud-source-warning").style.display = "none"
-        return( true );
-    }
 
-    function goto( oauthUrl ) {
-        $("*{project.name}").val()=document.getElementById("project-name").value;
-        window.open(oauthUrl);
-    }
+        .error-text {
+            color: #cc0033;
+            font-family: Helvetica, Arial, sans-serif;
+            font-weight: bold;
+            line-height: 20px;
+        }
+
+        .error-list {
+            list-style-type: circle;
+        }
+    </style>
+</head>
+<script th:inline="javascript" type="text/javascript">
 </script>
 <body>
 <main class="container">
@@ -46,43 +56,48 @@
         </ul>
     </nav>
     <section class="pico">
-        <form name = "newProjectForm" onsubmit="return validate()" action="#" th:action="@{/project/register}" method="post">
-            <label for="project-name">1. Добавьте имя Вашего проекта:
-                <input id="project-name"
-                       type="text"
-                       name="project-name"
-                       placeholder="Имя Вашего Проекта"
-                       aria-label="Project Local Path"
-                       required
-                       minlength="3"
-                       th:field="*{project.name}"
-                />
-            </label>
-            <label for="local-path-input">2. Вставьте путь к Вашему проекту
+        <form name="newProjectForm" onsubmit="return onSubmit()" action="#" th:action="@{/project/register}"
+              method="post">
+            <label for="project-name">1. Добавьте имя Вашего проекта:</label>
+            <input id="project-name"
+                   type="text"
+                   name="project-name"
+                   placeholder="Имя Вашего Проекта"
+                   aria-label="Project Local Path"
+                   th:field="*{newProjectSession.projectName}"
+                   th:class="${#fields.hasErrors('newProjectSession.projectName')} ? invalid_input"
+            />
+            <ul class="error-list">
+                <li th:each="err : ${#fields.errors('newProjectSession.projectName')}" th:text="${err}"
+                    class="error-text"/>
+            </ul>
+            <label for="local-path-input">2. Вставьте путь к Вашему проекту </label>
             <input id="local-path-input"
                    type="text"
                    name="local-path"
                    placeholder="Путь к Вашему проекту"
                    aria-label="Project Local Path"
-                   required
-                   minlength="3"
-                   pattern="^(?:[a-zA-Z]:|(\\\\|\/\/)).*"
-                   th:field="*{localSource.path}"
+                   th:field="*{newProjectSession.localPath}"
+                   th:class="${#fields.hasErrors('newProjectSession.localPath')} ? invalid_input"
             />
-            </label>
-            <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище
-                <fieldset id="cloud-source-group">
-                    <button class="outline" type="button" th:attr="onclick=|goto('${yandexOauthUrl}')|" >YANDEX DISK</button>
-                    <button class="outline" type="button">GOOGLE DISK</button>
-                </fieldset>
-                <ul id="cloud-source-list" th:each="keepSource : ${keepSources}">
-                    <li th:if="${keepSource.isCloud()}" th:text="${keepSource.getUserName()}"></li>
-                </ul>
-                <article id="cloud-source-warning" style="display: none">
-                    <h2>Внимание</h2>
-                    <p> Добавьте Облачное хранилище! </p>
-                </article>
-            </label>
+            <ul class="error-list">
+                <li th:each="err : ${#fields.errors('newProjectSession.localPath')}" th:text="${err}"
+                    class="error-text"/>
+            </ul>
+            <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище</label>
+            <fieldset id="cloud-source-group">
+                <button class="outline" th:formaction="@{/oauth2/redirect/yandex}"
+                        onclick="this.submint_source='cloud'">YANDEX DISK
+                </button>
+                <button class="outline" type="button">GOOGLE DISK</button>
+            </fieldset>
+            <ul id="cloud-source-list" th:each="keepSource : ${newProjectSession.getKeepSourceList()}">
+                <li th:if="${keepSource.isCloud()}" th:text="${keepSource.getUserName()}"></li>
+            </ul>
+            <ul class="error-list">
+                <li th:each="err : ${#fields.errors('newProjectSession.keepSourceList')}" th:text="${err}"
+                    class="error-text"/>
+            </ul>
             <fieldset role="group" id="form-button-fieldset">
                 <button type="submit">Создать</button>
                 <button type="reset">Отмена</button>
