@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark"/>
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <title>New Project</title>
+    <style>
+        .outline {
+            --pico-border-width: 0;
+            border-radius: 0.5rem;
+            margin-bottom: 0;
+        }
+
+        #cloud-source-group {
+            margin-bottom: 0;
+        }
+
+        #form-button-fieldset {
+            width: 100px;
+        }
+
+        .invalid_input {
+            background-image: var(--pico-icon-invalid);
+            --pico-border-color: var(--pico-form-element-invalid-border-color);
+            padding-right: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
+            padding-left: var(--pico-form-element-spacing-horizontal);
+            padding-inline-start: var(--pico-form-element-spacing-horizontal) !important;
+            padding-inline-end: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
+            background-position: center right 0.75rem;
+            background-size: 1rem auto;
+            background-repeat: no-repeat;
+        }
+
+        .error-text {
+            color: #cc0033;
+            font-family: Helvetica, Arial, sans-serif;
+            font-weight: bold;
+            line-height: 20px;
+        }
+
+        .error-list {
+            list-style-type: circle;
+        }
+    </style>
+</head>
+<script th:inline="javascript" type="text/javascript">
+</script>
+<body>
+<main class="container">
+    <nav>
+        <ul>
+            <li><a href="#">Project</a></li>
+            <li><a href="#">Resources</a></li>
+        </ul>
+    </nav>
+    <section class="pico">
+        <article id="article">
+            <h2>Ошибка</h2>
+            <p th:text="${error-message}">
+            </p>
+        </article>
+    </section>
+</main>
+</body>
+</html>

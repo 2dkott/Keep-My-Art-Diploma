@@ -9,8 +9,7 @@
     <style>
         .outline {
             --pico-border-width: 0;
-            border-radius: 0.5rem;
-            margin-bottom: 0;
+            width: fit-content;
         }
 
         #cloud-source-group {
@@ -48,6 +47,7 @@
 <script th:inline="javascript" type="text/javascript">
 </script>
 <body>
+
 <main class="container">
     <nav>
         <ul>
@@ -86,13 +86,15 @@
             </ul>
             <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище</label>
             <fieldset id="cloud-source-group">
-                <button class="outline" th:formaction="@{/oauth2/redirect/yandex}"
-                        onclick="this.submint_source='cloud'">YANDEX DISK
-                </button>
+                <button class="outline" th:formaction="@{/oauth2/redirect/yandex}">YANDEX DISK</button>
                 <button class="outline" type="button">GOOGLE DISK</button>
             </fieldset>
-            <ul id="cloud-source-list" th:each="keepSource : ${newProjectSession.getKeepSourceList()}">
-                <li th:if="${keepSource.isCloud()}" th:text="${keepSource.getUserName()}"></li>
+            <ul id="cloud-source-list" >
+                <li  class="grid" th:each="keepSource : ${newProjectSession.getKeepSourceList()}" th:if="${keepSource.isCloud()}">
+                    <p th:text="${keepSource.getUserName()}"></p>
+                    <div></div>
+                    <button  class="outline" th:formaction="@{|${urls.DELETE_SOURCE_FROM_NEW_PROJECT}/${keepSource.getUserName()}|}">&#9932;</button>
+                </li>
             </ul>
             <ul class="error-list">
                 <li th:each="err : ${#fields.errors('newProjectSession.keepSourceList')}" th:text="${err}"
