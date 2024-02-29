@@ -28,8 +28,10 @@ public class SourceService {
 
     public KeepSource removeKeepSourceById(long id) throws NoKeepSourceException {
         Optional<KeepSource> sourceToDelete = repository.findById(id);
-        sourceToDelete.ifPresent(keepSource -> repository.delete(keepSource));
-        return sourceToDelete.orElseThrow(() -> new NoKeepSourceException(id));
+        return sourceToDelete.map(source -> {
+            repository.delete(source);
+            return source;
+        }).orElseThrow(() -> new NoKeepSourceException(id));
     }
 
 }
