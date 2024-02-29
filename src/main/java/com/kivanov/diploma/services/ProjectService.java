@@ -14,15 +14,15 @@ public class ProjectService {
     @Autowired
     KeepProjectRepository repository;
 
-    public void saveProject(KeepProject project) {
-        repository.save(project);
+    public KeepProject saveProject(KeepProject project) {
+        return repository.save(project);
     }
 
     public List<KeepProject> getAllKeepProjects() {
         return (List<KeepProject>) repository.findAll();
     }
 
-    public KeepProject findProjecByIdt(long id) throws NoKeepProjectException{
+    public KeepProject findProjectById(long id) throws NoKeepProjectException{
         return repository.findById(id).orElseThrow(() -> new NoKeepProjectException(id));
     }
 

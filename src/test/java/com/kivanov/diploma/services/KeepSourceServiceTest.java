@@ -90,11 +90,19 @@ public class KeepSourceServiceTest {
     }
 
     @Test
-    public void testDeletSourceById() throws NoKeepSourceException {
+    public void testSuccessDeleteSourceById() throws NoKeepSourceException {
         KeepSource expectedSource = createCloudSource();
         when(keepSourceRepository.findById(1l)).thenReturn(Optional.of(expectedSource));
         KeepSource actualKeepSource = keepSourceService.removeKeepSourceById(1l);
         verify(keepSourceRepository, times(1)).delete(expectedSource);
         assert actualKeepSource.equals(expectedSource);
+    }
+
+    @Test
+    public void testFailDeleteSourceById() {
+        KeepSource expectedSource = createCloudSource();
+        Exception actualException = assertThrows(NoKeepSourceException.class, () -> keepSourceService.removeKeepSourceById(1000L));
+        verify(keepSourceRepository, times(0)).delete(expectedSource);
+        assert actualException.getMessage().equals(new NoKeepSourceException(1000L).getMessage());
     }
 }
