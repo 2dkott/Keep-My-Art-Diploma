@@ -64,7 +64,7 @@ public class ProjectController {
         KeepProject keepProject = new KeepProject();
         keepProject.setName(newProjectSession.getProjectName());
 
-        projectService.createProject(keepProject);
+        projectService.saveProject(keepProject);
 
         KeepSource mainSource = new KeepSource();
         mainSource.setPath(newProjectSession.getLocalPath());
