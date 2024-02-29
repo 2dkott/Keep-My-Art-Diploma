@@ -74,7 +74,7 @@ public class ProjectController {
 
         keepSources.forEach(keepSource -> keepSource.setProject(keepProject));
 
-        sourceService.createAll(keepSources);
+        sourceService.saveKeepSources(keepSources);
 
         return "home";
     }

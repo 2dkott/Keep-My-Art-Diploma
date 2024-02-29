@@ -14,8 +14,16 @@ public class SourceService {
     @Autowired
     KeepSourceRepository repository;
 
-    public void createAll(List<KeepSource> sources) {
-        repository.saveAll(sources);
+    public Iterable<KeepSource> saveKeepSources(List<KeepSource> sources) {
+        return repository.saveAll(sources);
+    }
+
+    public KeepSource saveKeepSource(KeepSource keepSource) {
+        return repository.save(keepSource);
+    }
+
+    public KeepSource findKeepSourceById(long id) throws NoKeepSourceException {
+        return repository.findById(id).orElseThrow(() -> new NoKeepSourceException(id));
     }
 
     public KeepSource removeKeepSourceById(long id) throws NoKeepSourceException {
