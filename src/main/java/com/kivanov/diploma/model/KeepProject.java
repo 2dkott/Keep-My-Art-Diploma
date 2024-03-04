@@ -24,4 +24,8 @@ public class KeepProject {
     @OneToMany(mappedBy = "project",cascade=CascadeType.ALL, fetch=FetchType.LAZY)
     private List<KeepSource> keepSources;
 
+    public KeepSource getLocalSource() {
+        return keepSources.stream().filter(keepSource -> !keepSource.isCloud()).findAny().orElseThrow();
+    }
+
 }

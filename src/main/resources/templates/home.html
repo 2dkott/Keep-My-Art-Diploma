@@ -7,6 +7,12 @@
     <link rel="stylesheet" th:href="@{/css/pico.min.css}">
     <title>Hello world!</title>
 </head>
+<script th:inline="javascript" type="text/javascript">
+    function loadProject( url ) {
+        //window.open(`[[${urls.SHOW_PROJECT}]]` + '/' + url);
+        window.open(url);
+    }
+</script>
 <body>
 <main class="container">
     <nav>
@@ -15,6 +21,18 @@
             <li><a href="#">Resources</a></li>
         </ul>
     </nav>
+    <label for="project-list">Активные проекты:</label>
+    <ul id="project-list" >
+        <li  class="grid"
+             th:data-name="@{|${urls.DELETE_SOURCE_FROM_NEW_PROJECT}/${keepSource.getUserName()}|}"
+             th:each="project : ${projects}"
+             th:att="onlclick=|loadProject('@{|${urls.DELETE_SOURCE_FROM_NEW_PROJECT}/${project.getId()}|}')|">
+<!--        <li  class="grid" th:each="project : ${projects}" th:att="onlclick=|loadProject('${project.getId()}')|">-->
+            <p th:text="${project.getName()}"></p>
+            <p th:text="${project.getLocalSource().getPath()}"></p>
+            <div></div>
+        </li>
+    </ul>
 </main>
 </body>
 </html>
