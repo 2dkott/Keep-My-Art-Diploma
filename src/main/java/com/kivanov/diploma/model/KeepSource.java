@@ -3,6 +3,8 @@ package com.kivanov.diploma.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "keepSources")
@@ -30,4 +32,7 @@ public class KeepSource {
     @ManyToOne
     @JoinColumn(name = "project_id")
     private KeepProject project;
+
+    @OneToMany(mappedBy = "source",cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    private List<KeepFile> keepSources;
 }

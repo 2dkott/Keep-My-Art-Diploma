@@ -1,5 +1,6 @@
 package com.kivanov.diploma.contollers;
 
+import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepProject;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.WebUrls;
@@ -10,7 +11,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +32,12 @@ public class ProjectController {
 
     @Autowired
     SourceService sourceService;
+
+    @Autowired
+    FileService fileService;
+
+    @Autowired
+    KeepFileModelMapper keepFileModelMapper;
 
     @GetMapping("/" + WebUrls.NEW)
     public String showNewProject(Model model, @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) {
@@ -78,18 +89,29 @@ public class ProjectController {
     }
 
     @GetMapping("/" + WebUrls.SHOW + "/{projectId}")
-    public String showProject(@PathVariable("projectId") long projectId, Model model) throws NoKeepProjectException {
+    public String showProject(@PathVariable("projectId") long projectId,
+                              Model model) throws NoKeepProjectException, IOException {
         KeepProject project = projectService.findProjectById(projectId);
         List<KeepSource> sources = project.getKeepSources().stream().filter(KeepSource::isCloud).toList();
         model.addAttribute("project", project);
         model.addAttribute("cloudSources", sources);
+        model.addAttribute("projectFiles", fileService.getProjectFiles(project));
+        model.addAttribute("files", keepFileModelMapper.getFileList(fileService.getProjectFiles(project)));
         return "project";
+    }
+
+    @GetMapping("/" + WebUrls.SYNC + "/{projectId}")
+    public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException {
+        KeepProject project = projectService.findProjectById(projectId);
+        fileService.recordFiles(project.getLocalSource(), project.getLocalSource().getPath());
+        return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId);
     }
 
     @ModelAttribute("newProjectSession")
     public NewProjectSession newProjectSession() {
         return new NewProjectSession();
     }
+
 
     @ModelAttribute("urls")
     public WebUrls urls() {
