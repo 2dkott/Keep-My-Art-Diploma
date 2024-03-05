@@ -33,6 +33,13 @@ public class KeepFile {
     @Column
     private boolean isDeleted;
 
+    @Column
+    private boolean isDirectory;
+
+    @ManyToOne
+    @JoinColumn(name = "source_id")
+    private KeepSource source;
+
     public KeepFile() {
     }
 }
