@@ -16,6 +16,9 @@ public class KeepSource {
     private boolean isCloud;
 
     @Column
+    private boolean isClone;
+
+    @Column
     private String path;
 
     @Column

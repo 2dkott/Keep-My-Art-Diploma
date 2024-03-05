@@ -3,10 +3,7 @@ package com.kivanov.diploma.contollers;
 import com.kivanov.diploma.model.KeepProject;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.WebUrls;
-import com.kivanov.diploma.services.NoKeepSourceException;
-import com.kivanov.diploma.services.ProjectService;
-import com.kivanov.diploma.services.SourceService;
-import com.kivanov.diploma.services.YandexService;
+import com.kivanov.diploma.services.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -68,6 +65,7 @@ public class ProjectController {
 
         KeepSource mainSource = new KeepSource();
         mainSource.setPath(newProjectSession.getLocalPath());
+        mainSource.setClone(false);
 
         List<KeepSource> keepSources = newProjectSession.getKeepSourceList();
         keepSources.add(mainSource);
@@ -77,6 +75,15 @@ public class ProjectController {
         sourceService.saveKeepSources(keepSources);
 
         return "home";
+    }
+
+    @GetMapping("/" + WebUrls.SHOW + "/{projectId}")
+    public String showProject(@PathVariable("projectId") long projectId, Model model) throws NoKeepProjectException {
+        KeepProject project = projectService.findProjectById(projectId);
+        List<KeepSource> sources = project.getKeepSources().stream().filter(KeepSource::isCloud).toList();
+        model.addAttribute("project", project);
+        model.addAttribute("cloudSources", sources);
+        return "project";
     }
 
     @ModelAttribute("newProjectSession")

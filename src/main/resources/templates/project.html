@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark" />
+    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <title th:text="${project.getName()}"></title>
+</head>
+<body>
+<main class="container">
+    <nav>
+        <ul>
+            <li><a href="#">Projects</a></li>
+            <li><a href="#">Resources</a></li>
+        </ul>
+    </nav>
+    <label for="project-data-list">Данные проекта:</label>
+    <div id="project-data-list">
+        <label for="project-local-path">Локальное хранилище:</label>
+        <p id="project-local-path" th:text="${project.getLocalSource().getPath()}"></p>
+        <label for="project-cloud-list">Удаленное хранилище</label>
+        <ul id="project-cloud-list" >
+            <li th:each="cloudSource : ${cloudSources}" th:text="${cloudSource.getUserName()}"></li>
+        </ul>
+    </div>
+
+</main>
+</body>
+</html>

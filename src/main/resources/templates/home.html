@@ -2,19 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark" />
-    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
-    <title>Hello world!</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="light dark" name="color-scheme"/>
+    <link rel="stylesheet" th:href="@{/material.min.css}">
+    <script th:src="@{/material.min.js}"></script>
+    <link th:href="@{/material-icons-main/iconfont/material-icons.css}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <title>Projects</title>
 </head>
+<style>
+    .mdl-list__item {
+        color: #fff;
+    }
+    #new_project_button_container {
+        margin-top: 25px;
+    }
+    #new_project_button {
+        float: right;
+    }
+</style>
+<script th:inline="javascript" type="text/javascript">
+    function openProjectView(project_id) {
+        var base_url = /*[[${urls.SHOW_PROJECT}]]*/""
+        this.openUrl(base_url + "/" + project_id);
+    }
+
+    function openNewProjectView() {
+        var base_url = /*[[${urls.NEW_PROJECT}]]*/""
+        this.openUrl(base_url);
+    }
+    function openUrl(url) {
+        window.open(url, "_self");
+    }
+</script>
+
 <body>
-<main class="container">
-    <nav>
-        <ul>
-            <li><a href="#">Project</a></li>
-            <li><a href="#">Resources</a></li>
-        </ul>
-    </nav>
-</main>
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+        <div class="mdl-layout__header-row">
+            <span class="mdl-layout-title">Проекты</span>
+            <div class="mdl-layout-spacer"></div>
+            <nav class="mdl-navigation mdl-layout--large-screen-only">
+                <a class="mdl-navigation__link" th:href="@{|/${urls.HOME}|}">Home</a>
+            </nav>
+        </div>
+    </header>
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">Проекты</span>
+        <nav class="mdl-navigation">
+            <a class="mdl-navigation__link" th:href="@{|/${urls.HOME}|}">Home</a>
+        </nav>
+    </div>
+    <main class="mdl-layout__content">
+
+        <div class="page-content">
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col"></div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <ul class="mdl-list" id="project-list">
+                        <li class="mdl-list__item mdl-list__item--two-line" style="cursor: pointer;"
+                            th:each="project : ${projects}" th:onclick="'openProjectView(' + ${project.getId()} + ')'">
+                            <span class="mdl-list__item-primary-content">
+                              <span><strong th:text="${project.getName()}"></strong></span>
+                              <span class="mdl-list__item-sub-title"
+                                    th:text="|Локальное хранилище: ${project.getLocalSource().getPath()}|"></span>
+                              <span class="mdl-list__item-sub-title"
+                                    th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></span>
+                            </span>
+                            <span class="mdl-list__item-secondary-content">
+                                <i class="material-icons-outlined mdl-list__item-icon">info</i>
+                            </span>
+                        </li>
+                    </ul>
+                    <div id="new_project_button_container">
+                        <button class="mdl-button mdl-js-button mdl-button--primary" id="new_project_button"
+                                th:attr="onclick=|openNewProjectView()|"
+                                th:onclick="'openNewProjectView()'">+ Добавить Проект</button>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--2-col"></div>
+            </div>
+        </div>
+    </main>
+</div>
 </body>
 </html>

@@ -24,4 +24,12 @@ public class KeepProject {
     @OneToMany(mappedBy = "project",cascade=CascadeType.ALL, fetch=FetchType.LAZY)
     private List<KeepSource> keepSources;
 
+    public KeepSource getLocalSource() {
+        return keepSources.stream().filter(keepSource -> !keepSource.isCloud()).filter(keepSource -> !keepSource.isClone()).findAny().orElseThrow();
+    }
+
+    public KeepSource getCloudSource() {
+        return keepSources.stream().filter(KeepSource::isCloud).filter(keepSource -> !keepSource.isClone()).findAny().orElseThrow();
+    }
+
 }
