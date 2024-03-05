@@ -65,6 +65,7 @@ public class ProjectController {
 
         KeepSource mainSource = new KeepSource();
         mainSource.setPath(newProjectSession.getLocalPath());
+        mainSource.setClone(false);
 
         List<KeepSource> keepSources = newProjectSession.getKeepSourceList();
         keepSources.add(mainSource);
