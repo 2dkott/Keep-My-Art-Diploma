@@ -4,6 +4,7 @@ public class WebUrls {
     final static public String PROJECT = "project";
     final static public String HOME = "home";
     final static public String REDIRECT = "redirect";
+    final static public String SYNC = "sync";
     final static public String DELETE_SOURCE = "delete-source";
     final static public String DELETE_SOURCE_FROM_NEW =  "/" + WebUrls.NEW + "/" + DELETE_SOURCE;
     final static public String NEW = "new";
@@ -14,6 +15,7 @@ public class WebUrls {
     final static public String OAUTH2_YANDEX = OAUTH2 + "/" + YANDEX;
     final static public String DELETE_SOURCE_FROM_NEW_PROJECT =  "/" + PROJECT + "/" + NEW + "/" + DELETE_SOURCE;
     final static public String SHOW_PROJECT =  "/" + PROJECT + "/" + SHOW;
+    final static public String SYNC_PROJECT =  "/" + PROJECT + "/" + SYNC;
     final static public String NEW_PROJECT =  "/" + PROJECT + "/" + NEW;
 
 }

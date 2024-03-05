@@ -39,6 +39,20 @@
         color: #fff;
     }
 </style>
+<script th:inline="javascript" type="text/javascript">
+    function syncProject(project_id) {
+        var base_url = /*[[${urls.SYNC_PROJECT}]]*/""
+        this.openUrl(base_url + "/" + project_id);
+    }
+
+    function openNewProjectView() {
+        var base_url = /*[[${urls.NEW_PROJECT}]]*/""
+        this.openUrl(base_url);
+    }
+    function openUrl(url) {
+        window.open(url, "_self");
+    }
+</script>
 <body>
 <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
     <header class="mdl-layout__header">
@@ -72,10 +86,14 @@
                             </ul>
                         </div>
                         <div class="mdl-card__actions mdl-card--border">
-                            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Синхронизировать</a>
+                            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+                               th:onclick="'syncProject(' + ${project.getId()} + ')'">Синхронизировать</a>
                             <div class="mdl-layout-spacer"></div>
                         </div>
                     </div>
+                    <ul>
+                        <li th:each="file : ${files}" th:text="|${file.getFile().getName()} ${file.getFullPath()}|"></li>
+                    </ul>
                 </div>
                 <div class="mdl-cell mdl-cell--2-col"></div>
             </div>
