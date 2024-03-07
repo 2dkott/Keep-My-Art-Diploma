@@ -1,13 +1,15 @@
-package com.kivanov.diploma.services;
+package com.kivanov.diploma.services.yandex;
 
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import com.github.scribejava.core.oauth.OAuth20Service;
 import com.google.gson.Gson;
 import com.kivanov.diploma.model.WebUrls;
+import com.kivanov.diploma.persistence.KeepFileRepository;
 import com.kivanov.diploma.services.oauth.YandexOauthApi20;
 import jakarta.annotation.PostConstruct;
 import lombok.NonNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,6 +26,9 @@ import java.util.concurrent.ExecutionException;
 public class YandexService {
     OAuth20Service service;
     OAuth2AccessToken accessToken;
+
+    @Autowired
+    KeepFileRepository keepFileRepository;
 
     @Value("${services.api.yandex.key}")
     private String apiKey;
