@@ -1,21 +1,21 @@
 package com.kivanov.diploma.contollers;
 
-import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepProject;
 import com.kivanov.diploma.model.KeepSource;
+import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.*;
+import com.kivanov.diploma.services.yandex.YandexService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,10 +34,18 @@ public class ProjectController {
     SourceService sourceService;
 
     @Autowired
-    FileService fileService;
+    @Qualifier("LocalFileService")
+    FileService localFileService;
+
+    @Autowired
+    @Qualifier("CloudsFileService")
+    FileService cloudsFileService;
 
     @Autowired
     KeepFileModelMapper keepFileModelMapper;
+
+    @Autowired
+    FileHandler fileHandler;
 
     @GetMapping("/" + WebUrls.NEW)
     public String showNewProject(Model model, @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) {
@@ -74,12 +82,13 @@ public class ProjectController {
 
         projectService.saveProject(keepProject);
 
-        KeepSource mainSource = new KeepSource();
-        mainSource.setPath(newProjectSession.getLocalPath());
-        mainSource.setClone(false);
+        KeepSource localSource = new KeepSource();
+        localSource.setType(SourceType.LOCAL);
+        localSource.setPath(newProjectSession.getLocalPath());
+        localSource.setClone(false);
 
         List<KeepSource> keepSources = newProjectSession.getKeepSourceList();
-        keepSources.add(mainSource);
+        keepSources.add(localSource);
 
         keepSources.forEach(keepSource -> keepSource.setProject(keepProject));
 
@@ -90,20 +99,21 @@ public class ProjectController {
 
     @GetMapping("/" + WebUrls.SHOW + "/{projectId}")
     public String showProject(@PathVariable("projectId") long projectId,
-                              Model model) throws NoKeepProjectException, IOException {
+                              Model model) throws NoKeepProjectException {
         KeepProject project = projectService.findProjectById(projectId);
-        List<KeepSource> sources = project.getKeepSources().stream().filter(KeepSource::isCloud).toList();
+        List<KeepSource> sources = project.getKeepSources().stream().toList();
         model.addAttribute("project", project);
         model.addAttribute("cloudSources", sources);
-        model.addAttribute("projectFiles", fileService.getProjectFiles(project));
-        model.addAttribute("files", keepFileModelMapper.getFileList(fileService.getProjectFiles(project)));
+        model.addAttribute("projectFiles", fileHandler.getProjectOnlyFiles(project));
+        model.addAttribute("files", keepFileModelMapper.getFileList(fileHandler.getProjectOnlyFiles(project)));
         return "project";
     }
 
     @GetMapping("/" + WebUrls.SYNC + "/{projectId}")
     public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException {
         KeepProject project = projectService.findProjectById(projectId);
-        fileService.recordFiles(project.getLocalSource(), project.getLocalSource().getPath());
+        localFileService.recordFiles(project.getLocalSource());
+        cloudsFileService.recordFiles(project.getCloudSource());
         return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId);
     }
 
