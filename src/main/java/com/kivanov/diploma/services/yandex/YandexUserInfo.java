@@ -1,4 +1,4 @@
-package com.kivanov.diploma.services;
+package com.kivanov.diploma.services.yandex;
 
 import lombok.Data;
 

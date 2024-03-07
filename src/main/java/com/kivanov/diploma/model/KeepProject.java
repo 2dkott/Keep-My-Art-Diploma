@@ -25,11 +25,17 @@ public class KeepProject {
     private List<KeepSource> keepSources;
 
     public KeepSource getLocalSource() {
-        return keepSources.stream().filter(keepSource -> !keepSource.isCloud()).filter(keepSource -> !keepSource.isClone()).findAny().orElseThrow();
+        return keepSources.stream()
+                .filter(keepSource -> keepSource.getType().equals(SourceType.LOCAL))
+                .filter(keepSource -> !keepSource.isClone())
+                .findAny().orElseThrow();
     }
 
     public KeepSource getCloudSource() {
-        return keepSources.stream().filter(KeepSource::isCloud).filter(keepSource -> !keepSource.isClone()).findAny().orElseThrow();
+        return keepSources.stream()
+                .filter(keepSource -> !keepSource.getType().equals(SourceType.LOCAL))
+                .filter(keepSource -> !keepSource.isClone())
+                .findAny().orElseThrow();
     }
 
 }

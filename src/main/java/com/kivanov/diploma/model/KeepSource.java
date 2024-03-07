@@ -15,9 +15,6 @@ public class KeepSource {
     private Long id;
 
     @Column
-    private boolean isCloud;
-
-    @Column
     private boolean isClone;
 
     @Column
@@ -35,4 +32,11 @@ public class KeepSource {
 
     @OneToMany(mappedBy = "source",cascade=CascadeType.ALL, fetch=FetchType.LAZY)
     private List<KeepFile> keepSources;
+
+    @Column
+    private SourceType type;
+
+    public boolean isCloud() {
+        return !type.equals(SourceType.LOCAL);
+    }
 }

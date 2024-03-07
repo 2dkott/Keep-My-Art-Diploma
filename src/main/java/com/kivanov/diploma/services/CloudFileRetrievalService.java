@@ -4,7 +4,7 @@ import com.kivanov.diploma.model.KeepSource;
 
 import java.io.IOException;
 
-public interface FileService {
+public interface CloudFileRetrievalService {
 
-    void recordFiles(KeepSource source) throws IOException;
+    void recordFileData(KeepSource source) throws IOException;
 }
