@@ -1,4 +1,4 @@
-package com.kivanov.diploma.services.yandex;
+package com.kivanov.diploma.services.cloud.yandex;
 
 import com.github.scribejava.core.builder.ServiceBuilder;
 import com.github.scribejava.core.model.OAuth2AccessToken;
