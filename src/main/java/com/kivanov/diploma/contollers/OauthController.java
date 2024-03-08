@@ -3,9 +3,10 @@ package com.kivanov.diploma.contollers;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.model.WebUrls;
-import com.kivanov.diploma.services.yandex.YandexService;
-import com.kivanov.diploma.services.yandex.YandexUserInfo;
+import com.kivanov.diploma.services.cloud.yandex.YandexService;
+import com.kivanov.diploma.services.cloud.yandex.YandexUserInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
@@ -21,6 +22,9 @@ public class OauthController {
     @Autowired
     YandexService yandexService;
 
+    @Value("${services.api.yandex.app_path}")
+    private String appPath;
+
     @GetMapping("/" + WebUrls.YANDEX)
     public RedirectView getAuthCodeFromYandex(@RequestParam("code") String code,
                                               @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) throws IOException, ExecutionException, InterruptedException {
@@ -31,7 +35,7 @@ public class OauthController {
         keepSource.setType(SourceType.YANDEX);
         keepSource.setUserToken(yandexService.getOauthToken());
         keepSource.setUserName(yandexUserInfo.getLogin());
-        keepSource.setPath("disk:/Приложения/keep_my_art");
+        keepSource.setPath(appPath);
         keepSource.setClone(false);
         newProjectSession.getKeepSourceList().add(keepSource);
 

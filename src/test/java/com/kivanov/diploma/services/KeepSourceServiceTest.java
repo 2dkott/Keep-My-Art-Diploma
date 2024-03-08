@@ -1,6 +1,8 @@
 package com.kivanov.diploma.services;
 
+import com.kivanov.diploma.TestUtils;
 import com.kivanov.diploma.model.KeepSource;
+import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.persistence.KeepSourceRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -25,37 +27,23 @@ public class KeepSourceServiceTest {
     @Autowired
     SourceService keepSourceService;
 
+    @Autowired
+    TestUtils testUtils;
+
     @MockBean
     KeepSourceRepository keepSourceRepository;
 
-    private KeepSource createLocalPathSource() {
-        KeepSource localSource = new KeepSource();
-        localSource.setCloud(false);
-        localSource.setPath("D:/Test");
-        return localSource;
-    }
-
-    private KeepSource createCloudSource() {
-        KeepSource cloudKeepSource = new KeepSource();
-        cloudKeepSource.setUserName("TestUserName");
-        cloudKeepSource.setCloud(true);
-        cloudKeepSource.setUserToken("TestTokenD");
-        cloudKeepSource.setPath("D:/Test");
-        return cloudKeepSource;
-    }
-
-
     public Stream<Arguments> keepSourceProvider() {
         return Stream.of(
-                Arguments.arguments("Save Cloud Resource", createCloudSource()),
-                Arguments.arguments("Save Local Path Resource", createLocalPathSource())
+                Arguments.arguments("Save Cloud Resource", TestUtils.createCloudSource(TestUtils.createProject())),
+                Arguments.arguments("Save Local Path Resource", TestUtils.createLocalPathSource(testUtils.createProject()))
                 );
     }
 
     public Stream<Arguments> keepSourceListProvider() {
         return Stream.of(
-                Arguments.arguments("Save list with single source", List.of(createCloudSource())),
-                Arguments.arguments("Save list with sources", List.of(createCloudSource(),createLocalPathSource()))
+                Arguments.arguments("Save list with single source", List.of(TestUtils.createCloudSource(TestUtils.createProject()))),
+                Arguments.arguments("Save list with sources", List.of(TestUtils.createCloudSource(TestUtils.createProject()), TestUtils.createLocalPathSource(testUtils.createProject())))
         );
     }
 
@@ -77,7 +65,7 @@ public class KeepSourceServiceTest {
 
     @Test
     public void testSuccessFindSourceById() throws NoKeepSourceException {
-        KeepSource expectedSource = createCloudSource();
+        KeepSource expectedSource = TestUtils.createCloudSource(TestUtils.createProject());
         when(keepSourceRepository.findById(1l)).thenReturn(Optional.of(expectedSource));
         KeepSource actualKeepSource = keepSourceService.findKeepSourceById(1l);
         assert actualKeepSource.equals(expectedSource);
@@ -91,7 +79,7 @@ public class KeepSourceServiceTest {
 
     @Test
     public void testSuccessDeleteSourceById() throws NoKeepSourceException {
-        KeepSource expectedSource = createCloudSource();
+        KeepSource expectedSource = TestUtils.createCloudSource(TestUtils.createProject());
         when(keepSourceRepository.findById(1l)).thenReturn(Optional.of(expectedSource));
         KeepSource actualKeepSource = keepSourceService.removeKeepSourceById(1l);
         verify(keepSourceRepository, times(1)).delete(expectedSource);
@@ -100,7 +88,7 @@ public class KeepSourceServiceTest {
 
     @Test
     public void testFailDeleteSourceById() {
-        KeepSource expectedSource = createCloudSource();
+        KeepSource expectedSource = TestUtils.createCloudSource(TestUtils.createProject());
         Exception actualException = assertThrows(NoKeepSourceException.class, () -> keepSourceService.removeKeepSourceById(1000L));
         verify(keepSourceRepository, times(0)).delete(expectedSource);
         assert actualException.getMessage().equals(new NoKeepSourceException(1000L).getMessage());

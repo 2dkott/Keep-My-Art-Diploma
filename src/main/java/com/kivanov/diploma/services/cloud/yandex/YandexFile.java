@@ -1,4 +1,4 @@
-package com.kivanov.diploma.services.yandex;
+package com.kivanov.diploma.services.cloud.yandex;
 
 import com.kivanov.diploma.services.CloudFile;
 import lombok.Data;

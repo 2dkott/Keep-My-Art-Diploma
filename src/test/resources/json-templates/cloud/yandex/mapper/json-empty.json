@@ -1,0 +1,22 @@
+{
+  "_embedded": {
+    "sort": "",
+    "items": [],
+    "limit": 20,
+    "offset": 0,
+    "path": "disk:/Приложения/keep_my_art",
+    "total": 3
+  },
+  "name": "keep_my_art",
+  "exif": {},
+  "resource_id": "264104534:cd5bcf4748a50650a3ba95feb07502005ee7415cbe520bec6faff04b1f977bef",
+  "created": "2023-07-17T15:01:34+00:00",
+  "modified": "2023-07-17T15:01:34+00:00",
+  "path": "disk:/Приложения/keep_my_art",
+  "comment_ids": {
+    "private_resource": "264104534:cd5bcf4748a50650a3ba95feb07502005ee7415cbe520bec6faff04b1f977bef",
+    "public_resource": "264104534:cd5bcf4748a50650a3ba95feb07502005ee7415cbe520bec6faff04b1f977bef"
+  },
+  "type": "dir",
+  "revision": 1689606094464637
+}
