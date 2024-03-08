@@ -5,7 +5,7 @@ import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.*;
-import com.kivanov.diploma.services.yandex.YandexService;
+import com.kivanov.diploma.services.cloud.yandex.YandexService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
