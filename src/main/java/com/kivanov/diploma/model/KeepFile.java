@@ -11,6 +11,8 @@ import java.util.List;
 @Table(name = "keepFiles")
 public class KeepFile {
 
+    public static final String ROOT = "ROOT";
+
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private Long id;
@@ -25,10 +27,10 @@ public class KeepFile {
     private List<KeepFile> children;
 
     @Column
-    private LocalDateTime creationTime;
+    private LocalDateTime creationDateTime;
 
     @Column
-    private LocalDateTime updateTime;
+    private LocalDateTime modifiedDateTime;
 
     @Column
     private boolean isDeleted;
@@ -36,10 +38,19 @@ public class KeepFile {
     @Column
     private boolean isDirectory;
 
+    @Column
+    private String sha256;
+
     @ManyToOne
     @JoinColumn(name = "source_id")
     private KeepSource source;
 
     public KeepFile() {
+    }
+
+    public static KeepFile Root() {
+        KeepFile root = new KeepFile();
+        root.setName(ROOT);
+        return root;
     }
 }
