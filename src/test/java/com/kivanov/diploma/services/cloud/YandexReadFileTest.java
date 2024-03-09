@@ -101,18 +101,18 @@ public class YandexReadFileTest {
         Assertions.assertAll(
                 () -> assertEquals(parentFile.getSource(), yandexSource),
                 () -> assertFalse(parentFile.isDirectory()),
-                () -> assertEquals(parentFile.getCreationTime(), LocalDateTime.parse(parentFileCreationTime, DateTimeFormatter.ISO_DATE_TIME)),
-                () -> assertEquals(parentFile.getUpdateTime(), LocalDateTime.parse(parentFileModifiedTime, DateTimeFormatter.ISO_DATE_TIME)),
+                () -> assertEquals(parentFile.getCreationDateTime(), LocalDateTime.parse(parentFileCreationTime, DateTimeFormatter.ISO_DATE_TIME)),
+                () -> assertEquals(parentFile.getModifiedDateTime(), LocalDateTime.parse(parentFileModifiedTime, DateTimeFormatter.ISO_DATE_TIME)),
 
                 () -> assertEquals(parentDir.getSource(), yandexSource),
                 () -> assertTrue(parentDir.isDirectory()),
-                () -> assertEquals(parentDir.getCreationTime(), LocalDateTime.parse(parentDirCreationTime, DateTimeFormatter.ISO_DATE_TIME)),
-                () -> assertEquals(parentDir.getUpdateTime(), LocalDateTime.parse(parentDirModifiedTime, DateTimeFormatter.ISO_DATE_TIME)),
+                () -> assertEquals(parentDir.getCreationDateTime(), LocalDateTime.parse(parentDirCreationTime, DateTimeFormatter.ISO_DATE_TIME)),
+                () -> assertEquals(parentDir.getModifiedDateTime(), LocalDateTime.parse(parentDirModifiedTime, DateTimeFormatter.ISO_DATE_TIME)),
 
                 () -> assertEquals(childFile.getSource(), yandexSource),
                 () -> assertFalse(childFile.isDirectory()),
-                () -> assertEquals(childFile.getCreationTime(), LocalDateTime.parse(childCreationTime, DateTimeFormatter.ISO_DATE_TIME)),
-                () -> assertEquals(childFile.getUpdateTime(), LocalDateTime.parse(childModifiedTime, DateTimeFormatter.ISO_DATE_TIME)),
+                () -> assertEquals(childFile.getCreationDateTime(), LocalDateTime.parse(childCreationTime, DateTimeFormatter.ISO_DATE_TIME)),
+                () -> assertEquals(childFile.getModifiedDateTime(), LocalDateTime.parse(childModifiedTime, DateTimeFormatter.ISO_DATE_TIME)),
                 () -> assertEquals(childFile.getParent(), parentDir)
         );
     }

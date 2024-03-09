@@ -40,8 +40,9 @@ public class YandexFileRetrievalService implements CloudFileRetrievalService {
             file.setParent(parent);
             file.setDirectory(yandexFile.isDirectory());
             file.setDeleted(false);
-            file.setCreationTime(yandexFile.getCreated());
-            file.setUpdateTime(yandexFile.getUpdated());
+            file.setCreationDateTime(yandexFile.getCreated());
+            file.setModifiedDateTime(yandexFile.getUpdated());
+            file.setSha256(yandexFile.getSha256());
             file.setSource(source);
             keepFileRepository.save(file);
             if (yandexFile.isDirectory()) {
