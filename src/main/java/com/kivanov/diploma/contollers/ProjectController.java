@@ -1,9 +1,6 @@
 package com.kivanov.diploma.contollers;
 
-import com.kivanov.diploma.model.KeepProject;
-import com.kivanov.diploma.model.KeepSource;
-import com.kivanov.diploma.model.SourceType;
-import com.kivanov.diploma.model.WebUrls;
+import com.kivanov.diploma.model.*;
 import com.kivanov.diploma.services.*;
 import com.kivanov.diploma.services.cloud.yandex.YandexService;
 import jakarta.validation.Valid;
@@ -45,7 +42,10 @@ public class ProjectController {
     KeepFileModelMapper keepFileModelMapper;
 
     @Autowired
-    FileHandler fileHandler;
+    FileRepositoryService fileRepositoryService;
+
+    @Autowired
+    FileSyncService fileSyncService;
 
     @GetMapping("/" + WebUrls.NEW)
     public String showNewProject(Model model, @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) {
@@ -104,16 +104,17 @@ public class ProjectController {
         List<KeepSource> sources = project.getKeepSources().stream().toList();
         model.addAttribute("project", project);
         model.addAttribute("cloudSources", sources);
-        model.addAttribute("projectFiles", fileHandler.getProjectOnlyFiles(project));
-        model.addAttribute("files", keepFileModelMapper.getFileList(fileHandler.getProjectOnlyFiles(project)));
+        model.addAttribute("projectFiles", fileRepositoryService.getProjectOnlyFiles(project));
+        model.addAttribute("files", keepFileModelMapper.getFileList(fileRepositoryService.getProjectOnlyFiles(project)));
         return "project";
     }
 
     @GetMapping("/" + WebUrls.SYNC + "/{projectId}")
     public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException {
         KeepProject project = projectService.findProjectById(projectId);
-        localFileService.recordFiles(project.getLocalSource());
-        cloudsFileService.recordFiles(project.getCloudSource());
+        //localFileService.recordFiles(project.getLocalSource());
+        //cloudsFileService.recordFiles(project.getCloudSource());
+        fileSyncService.syncLocalFiles(project);
         return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId);
     }
 

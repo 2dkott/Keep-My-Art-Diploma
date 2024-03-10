@@ -13,8 +13,9 @@ public class CloudsFileService implements FileService{
 
     CloudFileRetrievalService yandexFileService;
 
-    public CloudsFileService(KeepFileRepository fileRepository, HttpRequestMaker httpRequestMaker, UrlConfiguration urlConfiguration) {
-        yandexFileService = new YandexFileRetrievalService(fileRepository, httpRequestMaker, urlConfiguration);
+
+    public CloudsFileService(FileRepositoryService fileRepositoryService, HttpRequestMaker httpRequestMaker, UrlConfiguration urlConfiguration) {
+        yandexFileService = new YandexFileRetrievalService(fileRepositoryService, httpRequestMaker, urlConfiguration);
     }
 
 

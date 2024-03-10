@@ -2,13 +2,13 @@ package com.kivanov.diploma.services.cloud.yandex;
 
 import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepSource;
-import com.kivanov.diploma.persistence.KeepFileRepository;
 import com.kivanov.diploma.services.CloudFileRetrievalService;
+import com.kivanov.diploma.services.FileRepositoryService;
+import com.kivanov.diploma.services.cloud.ConnectionData;
 import com.kivanov.diploma.services.cloud.HttpRequestMaker;
 import com.kivanov.diploma.services.cloud.JsonMapper;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,15 +17,12 @@ import java.util.List;
 public class YandexFileRetrievalService implements CloudFileRetrievalService {
 
 
-    private final KeepFileRepository keepFileRepository;
+    private FileRepositoryService fileRepositoryService;
     private final HttpRequestMaker httpRequestMaker;
     private final UrlConfiguration urlConfiguration;
 
     public void recordFileData(KeepSource source) throws IOException {
-        KeepFile parent = new KeepFile();
-        parent.setName("root");
-        parent.setSource(source);
-        keepFileRepository.save(parent);
+        KeepFile parent = fileRepositoryService.saveRoot(source);
         ConnectionData connectionData = new ConnectionData();
         connectionData.setUrl(urlConfiguration.getYandex().getRoot() + source.getPath());
         connectionData.setOauthToken(source.getUserToken());
@@ -40,26 +37,20 @@ public class YandexFileRetrievalService implements CloudFileRetrievalService {
             file.setParent(parent);
             file.setDirectory(yandexFile.isDirectory());
             file.setDeleted(false);
-            file.setCreationDateTime(yandexFile.getCreated());
-            file.setModifiedDateTime(yandexFile.getUpdated());
+            file.setCreationDateTime(yandexFile.getCreatedDateTime());
+            file.setModifiedDateTime(yandexFile.getModifiedDateTime());
             file.setSha256(yandexFile.getSha256());
             file.setSource(source);
-            keepFileRepository.save(file);
+            fileRepositoryService.saveFile(file);
             if (yandexFile.isDirectory()) {
-                connectionData.setUrl(connectionData.getUrl() + "/" + yandexFile.getFileName());
+                connectionData.setUrl(connectionData.getUrl() + "/" + yandexFile.getName());
                 read(connectionData, source, file);
             }
         }
     }
 
-    private List<YandexFile> getFilesFromResource(ConnectionData connectionData) throws IOException {
-        String jsonResponse = httpRequestMaker.getResponse(connectionData.url, connectionData.oauthToken);
+    public List<YandexFile> getFilesFromResource(ConnectionData connectionData) throws IOException {
+        String jsonResponse = httpRequestMaker.getResponse(connectionData.getUrl(), connectionData.getOauthToken());
         return JsonMapper.mapJsonToYandexFiles(jsonResponse);
-    }
-
-    @Data
-    class ConnectionData {
-        private String url;
-        private String oauthToken;
     }
 }

@@ -16,13 +16,16 @@ public class ServicesConfiguration {
     @Autowired
     UrlConfiguration urlConfiguration;
 
+    @Autowired
+    FileRepositoryService fileRepositoryService;
+
     @Bean("LocalFileService")
     public FileService localFileService() {
-        return new LocalFileService(fileRepository);
+        return new LocalFileService(fileRepositoryService);
     }
 
     @Bean("CloudsFileService")
     public FileService cloudsFileService() {
-        return new CloudsFileService(fileRepository, new HttpRequestMaker(), urlConfiguration);
+        return new CloudsFileService(fileRepositoryService, new HttpRequestMaker(), urlConfiguration);
     }
 }

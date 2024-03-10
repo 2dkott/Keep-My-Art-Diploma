@@ -17,23 +17,24 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
 public class LocalFileService implements FileService{
 
-    private KeepFileRepository repository;
+    private FileRepositoryService fileRepositoryService;
 
     @Override
     public void recordFiles(KeepSource source) throws IOException {
-        KeepFile rootKeepFile = KeepFile.Root();
-        rootKeepFile.setSource(source);
-        repository.save(rootKeepFile);
+        KeepFile rootKeepFile = fileRepositoryService.saveRoot(source);
+        fileRepositoryService.saveFile(rootKeepFile);
         Path root = Paths.get(source.getPath());
         read(source, root, rootKeepFile);
     }
 
-    public void read(KeepSource source, Path rootPath, KeepFile parent) throws IOException {
+    private void read(KeepSource source, Path rootPath, KeepFile parent) throws IOException {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
             for (Path path : stream) {
                 boolean isDirectory = Files.isDirectory(path);
@@ -45,7 +46,7 @@ public class LocalFileService implements FileService{
                 file.setModifiedDateTime(getModifiedDateTime(path));
                 file.setSource(source);
                 file.setSha256(calculateSha256(path));
-                repository.save(file);
+                fileRepositoryService.saveFile(file);
                 if (isDirectory) {
                     read(source, path, file);
                 }
@@ -66,7 +67,7 @@ public class LocalFileService implements FileService{
 
     private LocalDateTime getCreationDateTime(Path path) {
         try {
-            return LocalDateTime.ofInstant(((FileTime) Files.getAttribute(path, "creationTime")).toInstant(), ZoneId.systemDefault());
+            return LocalDateTime.ofInstant(((FileTime) Files.getAttribute(path, "creationTime")).toInstant(), ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -75,7 +76,7 @@ public class LocalFileService implements FileService{
 
     private LocalDateTime getModifiedDateTime(Path path) {
         try {
-            return LocalDateTime.ofInstant((Files.getLastModifiedTime(path)).toInstant(), ZoneId.systemDefault());
+            return LocalDateTime.ofInstant((Files.getLastModifiedTime(path)).toInstant(), ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
         } catch (IOException e) {
             log.error(e.getMessage());
         }
