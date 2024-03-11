@@ -5,7 +5,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
 import com.kivanov.diploma.model.KeepFile;
-import com.kivanov.diploma.model.KeepFileSync;
+import com.kivanov.diploma.model.KeepFileSourceComparator;
 import com.kivanov.diploma.model.KeepProject;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.services.cloud.HttpRequestMaker;
@@ -41,7 +41,7 @@ public class FileSyncService {
     public List<KeepFile> removedList = new ArrayList<>();
     public List<KeepFile> modifiedList = new ArrayList<>();
 
-    public KeepFileSync keepFileSync = new KeepFileSync();
+    public KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
 
     public void syncLocalFiles(KeepProject project) throws IOException {
         syncLocalFileStorage(project.getLocalSource());
@@ -52,7 +52,7 @@ public class FileSyncService {
         KeepFile dbRoot = fileRepositoryService.findRootOfSource(source);
         KeepFile rootLocalKeepFile = new KeepFile();
         rootLocalKeepFile.setName("");
-        keepFileSync.compareLeftToRightSource(
+        keepFileSourceComparator.compareLeftToRightSource(
                 (file) -> {
                             StringBuffer stringPathBuilder = new StringBuffer(source.getPath()).append("/");
                             List<KeepFile> parents = new ArrayList<>();
@@ -99,7 +99,7 @@ public class FileSyncService {
         KeepFile dbRoot = fileRepositoryService.findRootOfSource(source);
         KeepFile rootLocalKeepFile = new KeepFile();
         rootLocalKeepFile.setName("");
-        keepFileSync.compareLeftToRightSource(
+        keepFileSourceComparator.compareLeftToRightSource(
                 (file) -> {
                     StringBuffer stringPathBuilder = new StringBuffer("/");
                     List<KeepFile> parents = new ArrayList<>();
@@ -128,7 +128,7 @@ public class FileSyncService {
 
         KeepFile localRoot = fileRepositoryService.findRootOfSource(localSource);
         KeepFile cloudRoot = fileRepositoryService.findRootOfSource(cloudSource);
-        keepFileSync.compareLeftToRightSource(
+        keepFileSourceComparator.compareLeftToRightSource(
                 (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
                 (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
                 localRoot,
