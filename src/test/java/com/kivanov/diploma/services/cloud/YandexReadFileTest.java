@@ -4,7 +4,7 @@ import com.kivanov.diploma.TestUtils;
 import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;
-import com.kivanov.diploma.persistence.KeepFileRepository;
+import com.kivanov.diploma.services.FileRepositoryService;
 import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrievalService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,7 @@ public class YandexReadFileTest {
     HttpRequestMaker httpRequestMaker;
 
     @MockBean
-    KeepFileRepository keepFileRepository;
+    FileRepositoryService fileRepositoryService;
 
     @Autowired
     UrlConfiguration urlConfiguration;
@@ -88,12 +88,12 @@ public class YandexReadFileTest {
         yandexSource.setPath(parentUrl);
         yandexSource.setUserToken(token);
 
-        YandexFileRetrievalService fileRetrievalService = new YandexFileRetrievalService(keepFileRepository, httpRequestMaker, urlConfiguration);
+        YandexFileRetrievalService fileRetrievalService = new YandexFileRetrievalService(fileRepositoryService, httpRequestMaker, urlConfiguration);
 
         fileRetrievalService.recordFileData(yandexSource);
 
         ArgumentCaptor<KeepFile> fileArgumentCaptor = ArgumentCaptor.forClass(KeepFile.class);
-        verify(keepFileRepository, times(4)).save(fileArgumentCaptor.capture());
+        verify(fileRepositoryService, times(3)).saveFile(fileArgumentCaptor.capture());
         List<KeepFile> capturedFiles = fileArgumentCaptor.getAllValues();
         KeepFile parentFile = capturedFiles.stream().filter(file -> file.getName().equals(parentFileName)).findFirst().orElseThrow();
         KeepFile parentDir = capturedFiles.stream().filter(file -> file.getName().equals(parentDireName)).findFirst().orElseThrow();
