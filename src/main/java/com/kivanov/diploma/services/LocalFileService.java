@@ -5,7 +5,6 @@ import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
 import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepSource;
-import com.kivanov.diploma.persistence.KeepFileRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @AllArgsConstructor
@@ -42,8 +40,8 @@ public class LocalFileService implements FileService{
                 file.setName(path.getFileName().toString());
                 file.setParent(parent);
                 file.setDirectory(isDirectory);
-                file.setCreationDateTime(getCreationDateTime(path));
-                file.setModifiedDateTime(getModifiedDateTime(path));
+                file.setCreationDateTime(Objects.requireNonNull(getCreationDateTime(path)));
+                file.setModifiedDateTime(Objects.requireNonNull(getModifiedDateTime(path)));
                 file.setSource(source);
                 file.setSha256(calculateSha256(path));
                 fileRepositoryService.saveFile(file);
@@ -67,7 +65,7 @@ public class LocalFileService implements FileService{
 
     private LocalDateTime getCreationDateTime(Path path) {
         try {
-            return LocalDateTime.ofInstant(((FileTime) Files.getAttribute(path, "creationTime")).toInstant(), ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
+            return LocalDateTime.ofInstant(((FileTime) Files.getAttribute(path, "creationTime")).toInstant(), ZoneId.systemDefault());
         } catch (IOException e) {
             log.error(e.getMessage());
         }
@@ -76,7 +74,7 @@ public class LocalFileService implements FileService{
 
     private LocalDateTime getModifiedDateTime(Path path) {
         try {
-            return LocalDateTime.ofInstant((Files.getLastModifiedTime(path)).toInstant(), ZoneId.systemDefault()).truncatedTo(ChronoUnit.SECONDS);
+            return LocalDateTime.ofInstant((Files.getLastModifiedTime(path)).toInstant(), ZoneId.systemDefault());
         } catch (IOException e) {
             log.error(e.getMessage());
         }
