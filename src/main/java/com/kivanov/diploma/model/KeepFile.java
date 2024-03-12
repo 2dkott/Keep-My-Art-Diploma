@@ -50,6 +50,9 @@ public class KeepFile implements Cloneable {
     @Column
     private String sha256;
 
+    @Column
+    private boolean isRoot=false;
+
     @ManyToOne
     @JoinColumn(name = "source_id")
     private KeepSource source;
@@ -70,13 +73,10 @@ public class KeepFile implements Cloneable {
         this.modifiedDateTime = modifiedDateTime.truncatedTo(ChronoUnit.SECONDS);
     }
 
-    public boolean isRoot() {
-        return name.equals(ROOT);
-    }
-
-    public static KeepFile Root() {
+    public static KeepFile Root(KeepSource keepSource) {
         KeepFile root = new KeepFile();
-        root.setName(ROOT);
+        root.setRoot(true);
+        root.setSource(keepSource);
         return root;
     }
 

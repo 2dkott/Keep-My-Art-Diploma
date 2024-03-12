@@ -41,17 +41,15 @@ public class FileSyncService {
     public List<KeepFile> removedList = new ArrayList<>();
     public List<KeepFile> modifiedList = new ArrayList<>();
 
-    public KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
-
     public void syncLocalFiles(KeepProject project) throws IOException {
         syncLocalFileStorage(project.getLocalSource());
         //syncCloudFileStorage(project.getCloudSource());
     }
 
     private void syncLocalFileStorage(KeepSource source) {
+        KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
         KeepFile dbRoot = fileRepositoryService.findRootOfSource(source);
-        KeepFile rootLocalKeepFile = new KeepFile();
-        rootLocalKeepFile.setName("");
+        KeepFile rootLocalKeepFile = KeepFile.Root(source);
         keepFileSourceComparator.compareLeftToRightSource(
                 (file) -> {
                             StringBuffer stringPathBuilder = new StringBuffer(source.getPath()).append("/");
@@ -60,7 +58,6 @@ public class FileSyncService {
                             parents.reversed().stream().filter(keepFile -> !keepFile.isRoot()).forEach(keepFile -> {
                                 stringPathBuilder.append("/").append(keepFile.getName());
                             });
-                            stringPathBuilder.append("/").append(file.getName());
                             log.info("Build File Root Path {}", stringPathBuilder);
                             try {
                                 Path parentPath = Paths.get(stringPathBuilder.toString());
@@ -88,17 +85,17 @@ public class FileSyncService {
                 rootLocalKeepFile,
                 dbRoot,
                 source);
-        //keepFileSync.getLeftNotMatchedFileList().forEach(this::saveKeepFile);
-        //keepFileSync.getRightNotMatchedFileList().forEach(this::saveKeepFileAsDeleted);
-        //keepFileSync.getModifiedFileList().forEach(this::saveKeepFile);
+        log.info(keepFileSourceComparator.modifiedFileList.toString());
+        log.info(keepFileSourceComparator.leftNotMatchedFileList.toString());
+        log.info(keepFileSourceComparator.rightNotMatchedFileList.toString());
     }
 
     private void syncCloudFileStorage(KeepSource source) {
+        KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
         YandexFileHandler yandexFileHandler = new YandexFileHandler(new HttpRequestMaker(), urlConfiguration);
 
         KeepFile dbRoot = fileRepositoryService.findRootOfSource(source);
-        KeepFile rootLocalKeepFile = new KeepFile();
-        rootLocalKeepFile.setName("");
+        KeepFile rootLocalKeepFile = KeepFile.Root(source);
         keepFileSourceComparator.compareLeftToRightSource(
                 (file) -> {
                     StringBuffer stringPathBuilder = new StringBuffer("/");
@@ -124,6 +121,7 @@ public class FileSyncService {
     }
 
     private void syncCloudAndLocalStorage(KeepSource localSource, KeepSource cloudSource) {
+        KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
         YandexFileHandler yandexFileHandler = new YandexFileHandler(new HttpRequestMaker(), urlConfiguration);
 
         KeepFile localRoot = fileRepositoryService.findRootOfSource(localSource);
@@ -140,9 +138,10 @@ public class FileSyncService {
     }
 
     private void buildLocalPathList(List<KeepFile> parents, KeepFile keepFile) {
+        parents.add(keepFile);
         KeepFile parent = keepFile.getParent();
         if (!Objects.isNull(parent)) {
-            parents.add(parent);
+            //parents.add(parent);
             buildLocalPathList(parents, parent);
         }
     }
@@ -160,95 +159,6 @@ public class FileSyncService {
         //keepFile.getChildren().forEach(keepFile1 -> saveKeepFileAsDeleted(keepFile1));
     }
 
-    private void sync2(Function<KeepFile, List<KeepFile>> fileListProvider, KeepFile rootPath, KeepFile dbRoot, KeepSource source) {
-        List<KeepFile> dbFiles = Objects.isNull(dbRoot.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(dbRoot);
-        List<KeepFile> sourcFileList = fileListProvider.apply(rootPath);
-        sourcFileList.forEach(syncFile -> {
-            Optional<KeepFile> dbFile = dbFiles.stream()
-                    .filter(keepFile -> keepFile.getName().equals(syncFile.getName()) && keepFile.isDirectory()==syncFile.isDirectory()).findFirst();
-            dbFile.ifPresentOrElse(keepFile -> {
-                        if(!syncFile.isDirectory()) {
-                            if(!keepFile.getSha256().equals(syncFile.getSha256())
-                                    || !keepFile.getCreationDateTime().equals(syncFile.getCreationDateTime())
-                                    || !keepFile.getModifiedDateTime().equals(syncFile.getModifiedDateTime())) {
-                                keepFile.setCreationDateTime(syncFile.getCreationDateTime());
-                                keepFile.setModifiedDateTime(syncFile.getModifiedDateTime());
-                                keepFile.setSha256(syncFile.getSha256());
-                                modifiedList.add(keepFile);
-                            }
-                        } else sync2(fileListProvider,
-                                syncFile,
-                                keepFile,
-                                source);
-                    },
-                    () -> {
-                        try {
-                            KeepFile newKeepFile = syncFile.cloneNew();
-                            newKeepFile.setParent(dbRoot);
-                            newKeepFile.setSource(source);
-                            newList.add(newKeepFile);
-                        } catch (CloneNotSupportedException e) {
-                            log.error(e.getMessage());
-                        }
-                        if(syncFile.isDirectory()) {
-                            sync2(fileListProvider,
-                                  syncFile,
-                                  syncFile,
-                                  source);
-                        }
-                    });
-        });
-        removedList.addAll(dbFiles.stream().filter(keepFile -> sourcFileList.stream().noneMatch(syncFile1 -> syncFile1.getName().equals(keepFile.getName()))).toList());
-        removedList.forEach(keepFile -> keepFile.setDeleted(true));
-    }
-
-
-    private void sync(Path rootPath, KeepFile dbRoot, KeepSource source) {
-        List<KeepFile> dbFiles = Objects.isNull(dbRoot.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(dbRoot);
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
-            List<Path> pathList = new ArrayList<>();
-            for (Path path : stream) {
-                pathList.add(path);
-                boolean isDirectory = Files.isDirectory(path);
-                LocalDateTime modificationDateTime = LocalDateTime.ofInstant((Files.getLastModifiedTime(path)).toInstant(), ZoneId.systemDefault());
-                LocalDateTime creationDateTime = LocalDateTime.ofInstant(((FileTime) Files.getAttribute(path, "creationTime")).toInstant(), ZoneId.systemDefault());
-
-                Optional<KeepFile> syncFile = dbFiles.stream()
-                        .filter(keepFile -> keepFile.getName().equals(path.getFileName().toString()) && keepFile.isDirectory()==isDirectory).findFirst();
-                syncFile.ifPresentOrElse(keepFile -> {
-                        if(!isDirectory) {
-                            if(!keepFile.getSha256().equals(calculateSha256(path))
-                                    || !keepFile.getCreationDateTime().equals(creationDateTime)
-                                    || !keepFile.getModifiedDateTime().equals(modificationDateTime)) {
-                                keepFile.setCreationDateTime(creationDateTime);
-                                keepFile.setModifiedDateTime(modificationDateTime);
-                                keepFile.setSha256(calculateSha256(path));
-                                modifiedList.add(keepFile);
-                            }
-                        } else sync(path, keepFile, source);
-                    },
-                    () -> {
-                        KeepFile newKeepFile = new KeepFile();
-                        newKeepFile.setDirectory(isDirectory);
-                        newKeepFile.setName(path.getFileName().toString());
-                        if(!isDirectory) newKeepFile.setSha256(calculateSha256(path));
-                        newKeepFile.setCreationDateTime(creationDateTime);
-                        newKeepFile.setModifiedDateTime(modificationDateTime);
-                        newKeepFile.setParent(dbRoot);
-                        newKeepFile.setSource(source);
-                        newList.add(newKeepFile);
-                        if(isDirectory) {
-                            sync(path, newKeepFile, source);
-                        }
-                    });
-            }
-            removedList.addAll(dbFiles.stream().filter(keepFile -> pathList.stream().noneMatch(path -> path.getFileName().toString().equals(keepFile.getName()))).toList());
-            removedList.forEach(keepFile -> keepFile.setDeleted(true));
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-    }
-
     private String calculateSha256(Path path) {
         try{
             ByteSource byteSource = com.google.common.io.Files.asByteSource(path.toFile());
@@ -259,73 +169,4 @@ public class FileSyncService {
         }
         return null;
     }
-    private List<CompareFile> checkDirectionDiff(List<CompareFile> left, List<CompareFile> right) {
-        List<CompareFile> diffList = new java.util.ArrayList<>(List.copyOf(left));
-        diffList.removeAll(right);
-        return diffList;
-    }
-
-    @Getter
-    class CompareFile {
-
-        private String sha5 = "";
-        private String fileName;
-        private LocalDateTime creationDateTime;
-        private LocalDateTime modifiedDateTime;
-        private boolean isDir = false;
-        private KeepFile keepFile;
-
-        @Override
-        public boolean equals(Object object) {
-            if (!(object instanceof CompareFile)) return false;
-            return ((CompareFile) object).getFileName().equals(this.fileName)
-                    && ((CompareFile) object).getSha5().equals(this.sha5)
-                    && ((CompareFile) object).getModifiedDateTime().equals(this.modifiedDateTime)
-                    && ((CompareFile) object).getCreationDateTime().equals(this.creationDateTime)
-                    && ((CompareFile) object).isDir() == (this.isDir);
-        }
-        public CompareFile(Path path) throws IOException {
-            try {
-                FileTime creationTime = (FileTime) Files.getAttribute(path, "creationTime");
-                FileTime modificationTime = Files.getLastModifiedTime(path);
-                fileName = path.getFileName().toString();
-                creationDateTime = LocalDateTime.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
-                modifiedDateTime = LocalDateTime.ofInstant(modificationTime.toInstant(), ZoneId.systemDefault());
-                isDir = Files.isDirectory(path);
-                if(!isDir) {
-                    ByteSource byteSource = com.google.common.io.Files.asByteSource(path.toFile());
-                    HashCode hc = byteSource.hash(Hashing.sha256());
-                    sha5 = hc.toString();
-                }
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
-            FileTime creationTime = (FileTime) Files.getAttribute(path, "creationTime");
-            FileTime modificationTime = Files.getLastModifiedTime(path);
-            fileName = path.getFileName().toString();
-            creationDateTime = LocalDateTime.ofInstant(creationTime.toInstant(), ZoneId.systemDefault());
-            modifiedDateTime = LocalDateTime.ofInstant(modificationTime.toInstant(), ZoneId.systemDefault());
-            isDir = Files.isDirectory(path);
-            if(!isDir) {
-                ByteSource byteSource = com.google.common.io.Files.asByteSource(path.toFile());
-                HashCode hc = byteSource.hash(Hashing.sha256());
-                sha5 = hc.toString();
-            }
-        }
-
-        public CompareFile(KeepFile keepFile) {
-            isDir = keepFile.isDirectory();
-            fileName = keepFile.getName();
-            creationDateTime = keepFile.getCreationDateTime();
-            modifiedDateTime = keepFile.getModifiedDateTime();
-            this.keepFile = keepFile;
-        }
-
-        public void setKeepFile(KeepFile keepFile) {
-            this.keepFile = keepFile;
-        }
-
-    }
-
-
 }

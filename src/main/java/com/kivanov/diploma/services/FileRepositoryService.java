@@ -17,7 +17,9 @@ public class FileRepositoryService {
     KeepFileRepository fileRepository;
 
     public KeepFile saveRoot(KeepSource source){
-        KeepFile rootKeepFile = KeepFile.Root();
+        KeepFile rootKeepFile = new KeepFile();
+        rootKeepFile.setName("");
+        rootKeepFile.setRoot(true);
         rootKeepFile.setSource(source);
         fileRepository.save(rootKeepFile);
         return rootKeepFile;
@@ -39,7 +41,7 @@ public class FileRepositoryService {
     }
 
     public KeepFile findRootOfSource(KeepSource source) {
-        List<KeepFile> fileList = fileRepository.findKeepFileByNameAndSource(KeepFile.Root().getName(), source);
+        List<KeepFile> fileList = fileRepository.findKeepFilesByIsRootAndSource(true, source);
         if(fileList.isEmpty()) return null;
         else return fileList.get(0);
     }
