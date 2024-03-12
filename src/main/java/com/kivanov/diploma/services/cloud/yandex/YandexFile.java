@@ -1,7 +1,6 @@
 package com.kivanov.diploma.services.cloud.yandex;
 
 import com.kivanov.diploma.model.KeepFile;
-import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.services.SyncFile;
 import lombok.Data;
 
@@ -32,7 +31,7 @@ public class YandexFile implements SyncFile {
         return type.equals("dir");
     }
 
-    public KeepFile mapToKeepFile(KeepFile parent, KeepSource source) {
+    public KeepFile mapToKeepFile(KeepFile parent) {
         KeepFile file = new KeepFile();
         file.setName(getName());
         file.setDirectory(isDirectory());
@@ -40,7 +39,7 @@ public class YandexFile implements SyncFile {
         file.setCreationDateTime(getCreatedDateTime());
         file.setModifiedDateTime(getModifiedDateTime());
         file.setSha256(getSha256());
-        file.setSource(source);
+        file.setSource(parent.getSource());
         file.setParent(parent);
         return file;
     }
