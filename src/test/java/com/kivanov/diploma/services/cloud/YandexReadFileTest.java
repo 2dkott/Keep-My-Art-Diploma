@@ -88,9 +88,9 @@ public class YandexReadFileTest {
         yandexSource.setPath(parentUrl);
         yandexSource.setUserToken(token);
 
-        YandexFileRetrievalService fileRetrievalService = new YandexFileRetrievalService(fileRepositoryService, httpRequestMaker, urlConfiguration);
+        //YandexFileRetrievalService fileRetrievalService = new YandexFileRetrievalService(fileRepositoryService, httpRequestMaker, urlConfiguration);
 
-        fileRetrievalService.recordFileData(yandexSource);
+        //fileRetrievalService.fetchCLoudFileToKeepFiles(yandexSource);
 
         ArgumentCaptor<KeepFile> fileArgumentCaptor = ArgumentCaptor.forClass(KeepFile.class);
         verify(fileRepositoryService, times(3)).saveFile(fileArgumentCaptor.capture());

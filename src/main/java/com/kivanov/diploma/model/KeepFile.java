@@ -76,19 +76,9 @@ public class KeepFile implements Cloneable {
     public static KeepFile Root(KeepSource keepSource) {
         KeepFile root = new KeepFile();
         root.setRoot(true);
+        root.setName(ROOT);
         root.setSource(keepSource);
         return root;
-    }
-
-    public Object clone() throws CloneNotSupportedException
-    {
-        return super.clone();
-    }
-
-    public KeepFile cloneNew() throws CloneNotSupportedException {
-        KeepFile target = (KeepFile) super.clone();
-        target.id=null;
-        return target;
     }
 
     @PrePersist

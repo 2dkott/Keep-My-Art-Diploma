@@ -1,8 +1,6 @@
 package com.kivanov.diploma.services.localstorage;
 
-import com.google.common.hash.HashCode;
-import com.google.common.hash.Hashing;
-import com.google.common.io.ByteSource;
+import com.google.common.collect.Lists;
 import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.services.FileRepositoryService;
@@ -10,16 +8,11 @@ import com.kivanov.diploma.services.FileService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Slf4j
 @AllArgsConstructor
@@ -28,66 +21,59 @@ public class LocalFileService implements FileService {
     private FileRepositoryService fileRepositoryService;
 
     @Override
-    public void initRecordFiles(KeepSource source) throws IOException {
+    public void initRecordFiles(KeepSource source) {
+        log.info("Initiate getting data from Local Storage {}", source.getPath());
         KeepFile rootKeepFile = fileRepositoryService.saveRoot(source);
-        fileRepositoryService.saveFile(rootKeepFile);
-        Path root = Paths.get(source.getPath());
-        read(source, root, rootKeepFile);
+        log.info("Root File id:{} is saved", rootKeepFile.getId());
+        Path localPath = Paths.get(source.getPath()) ;
+        List<KeepFile> keepFileList = new ArrayList<>();
+        searchAndMapFilesToKeepFileList(localPath, rootKeepFile, keepFileList);
+        log.info("File List was fetched {}", keepFileList);
+        fileRepositoryService.saveKeepFileListByParent(rootKeepFile, keepFileList);
+        log.info("File List was saved in DB");
     }
 
     @Override
-    public List<KeepFile> collectKeepFilesByRootFile(KeepFile keepFile, KeepSource keepSource) {
-        return null;
+    public List<KeepFile> collectKeepFilesByRootFile(KeepFile keepFile, KeepSource source) {
+        log.info("Initiate getting data from Local Storage {}", source.getPath() + keepFile.getPathId());
+        Path localPath = Paths.get(source.getPath() + keepFile.getPathId()) ;
+        List<KeepFile> keepFileList = new ArrayList<>();
+        flatSearchAndMapFilesToKeepFileList(localPath, keepFile, keepFileList);
+        log.info("File List was fetched {}", keepFileList);
+        return keepFileList;
     }
 
-    private void read(KeepSource source, Path rootPath, KeepFile parent) throws IOException {
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath)) {
-            for (Path path : stream) {
-                boolean isDirectory = Files.isDirectory(path);
-                KeepFile file = new KeepFile();
-                file.setName(path.getFileName().toString());
-                file.setParent(parent);
-                file.setDirectory(isDirectory);
-                file.setCreationDateTime(Objects.requireNonNull(getCreationDateTime(path)));
-                file.setModifiedDateTime(Objects.requireNonNull(getModifiedDateTime(path)));
-                file.setSource(source);
-                file.setSha256(calculateSha256(path));
-                fileRepositoryService.saveFile(file);
-                if (isDirectory) {
-                    read(source, path, file);
-                }
-            }
-        }
+    public void searchAndMapFilesToKeepFileList(Path rootPath, KeepFile parent, List<KeepFile> keepFilesStorage) {
+        List<LocalPathFile> localPathFiles = readPath(rootPath);
+        localPathFiles.forEach(localPathFile -> {
+            KeepFile keepFile = localPathFile.mapToKeepFile(parent);
+            keepFilesStorage.add(keepFile);
+            if(localPathFile.isDirectory()) searchAndMapFilesToKeepFileList(localPathFile.getPath(), keepFile, keepFilesStorage);
+        });
     }
 
-
-
-    private String calculateSha256(Path path) {
-        try{
-            ByteSource byteSource = com.google.common.io.Files.asByteSource(path.toFile());
-            HashCode hc = byteSource.hash(Hashing.sha256());
-            return hc.toString();
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return null;
+    public void flatSearchAndMapFilesToKeepFileList(Path rootPath, KeepFile parent, List<KeepFile> keepFilesStorage) {
+        List<LocalPathFile> localPathFiles = readPath(rootPath);
+        localPathFiles.forEach(localPathFile -> {
+            KeepFile keepFile = localPathFile.mapToKeepFile(parent);
+            keepFilesStorage.add(keepFile);
+        });
     }
 
-    private LocalDateTime getCreationDateTime(Path path) {
+    private List<LocalPathFile> readPath(Path rootPath) {
+        log.info("Reading Path Files from root Path {}", rootPath);
         try {
-            return LocalDateTime.ofInstant(((FileTime) Files.getAttribute(path, "creationTime")).toInstant(), ZoneId.systemDefault());
-        } catch (IOException e) {
-            log.error(e.getMessage());
+            return Lists.newArrayList(Files.newDirectoryStream(rootPath)).stream().map(LocalPathFile::new).toList();
+        } catch (Exception e) {
+            log.error("Reading Path Files from root Path {} was failed", rootPath);
+            log.error("");
         }
-        return null;
+        return new ArrayList<>();
     }
 
-    private LocalDateTime getModifiedDateTime(Path path) {
-        try {
-            return LocalDateTime.ofInstant((Files.getLastModifiedTime(path)).toInstant(), ZoneId.systemDefault());
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
-        return null;
-    }
+
+
+
+
+
 }
