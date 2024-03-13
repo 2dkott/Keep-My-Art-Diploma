@@ -40,7 +40,7 @@ public class FileSyncService {
         try {
             log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
             Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
-            if(rootKeepFile.isEmpty()) cloudsFileService.initRecordFiles(keepSource);
+            if(rootKeepFile.isEmpty()) cloudsFileService.initFindAndSaveAllFiles(keepSource);
         } catch (Exception e) {
             log.error("Attempt to init file recording from Local Storage '{}' was fail with error:", keepSource.getPath());
             log.error(e.getMessage());
@@ -51,7 +51,7 @@ public class FileSyncService {
         try {
             log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
             Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
-            if(rootKeepFile.isEmpty()) localFileService.initRecordFiles(keepSource);
+            if(rootKeepFile.isEmpty()) localFileService.initFindAndSaveAllFiles(keepSource);
         } catch (Exception e) {
             log.error("Attempt to init file recording from Local Storage '{}' was fail with error:", keepSource.getPath());
             log.error(e.getMessage());

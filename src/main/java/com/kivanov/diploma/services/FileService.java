@@ -8,8 +8,7 @@ import java.util.List;
 
 public interface FileService {
 
-    void initRecordFiles(KeepSource source) throws IOException;
+    void initFindAndSaveAllFiles(KeepSource source);
 
-    //List<KeepFile> collectKeepFilesByRootFile(KeepFile rootPath, KeepSource keepSource, List<KeepFile> fileList) throws IOException;
     List<KeepFile> collectKeepFilesByRootFile(KeepFile rootPath, KeepSource keepSource);
 }

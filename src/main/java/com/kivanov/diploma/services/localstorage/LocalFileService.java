@@ -21,7 +21,7 @@ public class LocalFileService implements FileService {
     private FileRepositoryService fileRepositoryService;
 
     @Override
-    public void initRecordFiles(KeepSource source) {
+    public void initFindAndSaveAllFiles(KeepSource source) {
         log.info("Initiate getting data from Local Storage {}", source.getPath());
         KeepFile rootKeepFile = fileRepositoryService.saveRoot(source);
         log.info("Root File id:{} is saved", rootKeepFile.getId());

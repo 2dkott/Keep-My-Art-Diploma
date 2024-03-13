@@ -29,7 +29,7 @@ public class CloudsFileService implements FileService{
     }
 
     @Override
-    public void initRecordFiles(KeepSource cloudSources) {
+    public void initFindAndSaveAllFiles(KeepSource cloudSources) {
         log.info("Choosing cloud to fetch file data for Source {}", cloudSources);
         retrievalServices.keySet().forEach(cloudFileServiceKey -> {
             if(cloudFileServiceKey.equals(cloudSources.getType())) {
