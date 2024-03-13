@@ -1,10 +1,12 @@
-package com.kivanov.diploma.services;
+package com.kivanov.diploma.services.localstorage;
 
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.ByteSource;
 import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepSource;
+import com.kivanov.diploma.services.FileRepositoryService;
+import com.kivanov.diploma.services.FileService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,20 +18,26 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Objects;
 
 @Slf4j
 @AllArgsConstructor
-public class LocalFileService implements FileService{
+public class LocalFileService implements FileService {
 
     private FileRepositoryService fileRepositoryService;
 
     @Override
-    public void recordFiles(KeepSource source) throws IOException {
+    public void initRecordFiles(KeepSource source) throws IOException {
         KeepFile rootKeepFile = fileRepositoryService.saveRoot(source);
         fileRepositoryService.saveFile(rootKeepFile);
         Path root = Paths.get(source.getPath());
         read(source, root, rootKeepFile);
+    }
+
+    @Override
+    public List<KeepFile> collectKeepFilesByRootFile(KeepFile keepFile, KeepSource keepSource) {
+        return null;
     }
 
     private void read(KeepSource source, Path rootPath, KeepFile parent) throws IOException {
@@ -51,6 +59,8 @@ public class LocalFileService implements FileService{
             }
         }
     }
+
+
 
     private String calculateSha256(Path path) {
         try{

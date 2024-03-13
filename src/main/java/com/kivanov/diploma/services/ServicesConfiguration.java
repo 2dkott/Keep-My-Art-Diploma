@@ -3,6 +3,7 @@ package com.kivanov.diploma.services;
 import com.kivanov.diploma.persistence.KeepFileRepository;
 import com.kivanov.diploma.services.cloud.HttpRequestMaker;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
+import com.kivanov.diploma.services.localstorage.LocalFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
