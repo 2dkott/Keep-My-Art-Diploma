@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FileRepositoryService {
@@ -32,6 +33,19 @@ public class FileRepositoryService {
         return fileList;
     }
 
+    public void saveKeepFileListByParent(KeepFile rootKeepFile, List<KeepFile> keepFiles) {
+        saveWithChildren(rootKeepFile, keepFiles);
+    }
+
+    private void saveWithChildren(KeepFile keepFileRoot, List<KeepFile> fileList) {
+        fileRepository.save(keepFileRoot);
+        List<KeepFile> matchedFileList = fileList.stream().filter(keepFile -> keepFile.getParent().equals(keepFileRoot)).toList();
+        fileList.removeAll(matchedFileList);
+        matchedFileList.forEach(keepFile -> {
+            saveWithChildren(keepFile, fileList);
+        });
+    }
+
     public List<KeepFile> findALlFilesBYParent(KeepFile parent) {
         return fileRepository.findKeepFileByParent(parent);
     }
@@ -40,10 +54,9 @@ public class FileRepositoryService {
         return fileRepository.findKeepFileByParent(parent).stream().filter(keepFile -> !keepFile.isDeleted()).toList();
     }
 
-    public KeepFile findRootOfSource(KeepSource source) {
+    public Optional<KeepFile> findRootOfSource(KeepSource source) {
         List<KeepFile> fileList = fileRepository.findKeepFilesByIsRootAndSource(true, source);
-        if(fileList.isEmpty()) return null;
-        else return fileList.get(0);
+        return Optional.ofNullable(fileList.isEmpty() ? null : fileList.get(0));
     }
 
     public void saveFile(KeepFile keepFile) {
