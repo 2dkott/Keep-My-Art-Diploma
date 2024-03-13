@@ -5,7 +5,6 @@ import com.kivanov.diploma.services.*;
 import com.kivanov.diploma.services.cloud.yandex.YandexService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,14 +28,6 @@ public class ProjectController {
 
     @Autowired
     SourceService sourceService;
-
-    @Autowired
-    @Qualifier("LocalFileService")
-    FileService localFileService;
-
-    @Autowired
-    @Qualifier("CloudsFileService")
-    FileService cloudsFileService;
 
     @Autowired
     KeepFileModelMapper keepFileModelMapper;
@@ -112,8 +103,6 @@ public class ProjectController {
     @GetMapping("/" + WebUrls.SYNC + "/{projectId}")
     public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException {
         KeepProject project = projectService.findProjectById(projectId);
-        //localFileService.recordFiles(project.getLocalSource());
-        //cloudsFileService.recordFiles(project.getCloudSource());
         fileSyncService.syncLocalFiles(project);
         return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId);
     }
