@@ -22,7 +22,7 @@ public class FileRepositoryService {
         rootKeepFile.setName("");
         rootKeepFile.setRoot(true);
         rootKeepFile.setSource(source);
-        fileRepository.save(rootKeepFile);
+        saveFile(rootKeepFile);
         return rootKeepFile;
     }
 
@@ -38,7 +38,7 @@ public class FileRepositoryService {
     }
 
     private void saveWithChildren(KeepFile keepFileRoot, List<KeepFile> fileList) {
-        fileRepository.save(keepFileRoot);
+        saveFile(keepFileRoot);
         List<KeepFile> matchedFileList = fileList.stream().filter(keepFile -> keepFile.getParent().equals(keepFileRoot)).toList();
         fileList.removeAll(matchedFileList);
         matchedFileList.forEach(keepFile -> {
@@ -48,6 +48,9 @@ public class FileRepositoryService {
 
     public List<KeepFile> findALlFilesBYParent(KeepFile parent) {
         return fileRepository.findKeepFileByParent(parent);
+    }
+    public List<KeepFile> findALlFilesBySource(KeepSource source) {
+        return fileRepository.findKeepFilesBySource(source);
     }
 
     public List<KeepFile> findNotDeletedFilesByParent(KeepFile parent) {

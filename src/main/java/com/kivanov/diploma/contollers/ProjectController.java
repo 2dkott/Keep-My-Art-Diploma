@@ -101,7 +101,7 @@ public class ProjectController {
     }
 
     @GetMapping("/" + WebUrls.SYNC + "/{projectId}")
-    public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException {
+    public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException, FileDealingException {
         KeepProject project = projectService.findProjectById(projectId);
         fileSyncService.syncLocalFiles(project);
         return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId);

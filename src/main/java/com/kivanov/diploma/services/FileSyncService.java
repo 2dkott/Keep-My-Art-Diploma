@@ -5,6 +5,7 @@ import com.kivanov.diploma.model.KeepFileSourceComparator;
 import com.kivanov.diploma.model.KeepProject;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
+import com.kivanov.diploma.services.localstorage.LocalFileReadingException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,40 +32,36 @@ public class FileSyncService {
     @Qualifier("LocalFileService")
     FileService localFileService;
 
-    public void syncLocalFiles(KeepProject project) {
+    public void syncLocalFiles(KeepProject project) throws FileDealingException {
         syncLocalFileStorage(project.getLocalSource());
         syncCloudFileStorage(project.getCloudSource());
     }
 
-    public void initDataFromCloud(@NonNull KeepSource keepSource) {
-        try {
-            log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
-            Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
-            if(rootKeepFile.isEmpty()) cloudsFileService.initRecordFiles(keepSource);
-        } catch (Exception e) {
-            log.error("Attempt to init file recording from Local Storage '{}' was fail with error:", keepSource.getPath());
-            log.error(e.getMessage());
-        }
+    public void initDataFromCloud(@NonNull KeepSource keepSource) throws FileDealingException {
+        log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
+        Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
+        if(rootKeepFile.isEmpty()) cloudsFileService.initFindAndSaveAllFiles(keepSource);
     }
 
-    public void initDataFromLocal(@NonNull KeepSource keepSource) {
-        try {
-            log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
-            Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
-            if(rootKeepFile.isEmpty()) localFileService.initRecordFiles(keepSource);
-        } catch (Exception e) {
-            log.error("Attempt to init file recording from Local Storage '{}' was fail with error:", keepSource.getPath());
-            log.error(e.getMessage());
-        }
+    public void initDataFromLocal(@NonNull KeepSource keepSource) throws FileDealingException {
+        log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
+        Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
+        if(rootKeepFile.isEmpty()) localFileService.initFindAndSaveAllFiles(keepSource);
     }
 
-    private void syncLocalFileStorage(KeepSource source) {
+    private void syncLocalFileStorage(KeepSource source) throws FileDealingException {
         initDataFromLocal(source);
         KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
         fileRepositoryService.findRootOfSource(source).ifPresentOrElse(keepFileFromDb -> {
             KeepFile rootLocalKeepFile = KeepFile.Root(null);
             keepFileSourceComparator.compareLeftToRightSource(
-                    (file) -> localFileService.collectKeepFilesByRootFile(file, source),
+                    (file) -> {
+                        try {
+                            return localFileService.collectKeepFilesByRootFile(file, source);
+                        } catch (FileDealingException e) {
+                            throw new RuntimeException(e);
+                        }
+                    },
                     (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
                     rootLocalKeepFile,
                     keepFileFromDb,
@@ -73,13 +70,19 @@ public class FileSyncService {
 
     }
 
-    private void syncCloudFileStorage(KeepSource source) {
+    private void syncCloudFileStorage(KeepSource source) throws FileDealingException {
         initDataFromCloud(source);
         KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
         fileRepositoryService.findRootOfSource(source).ifPresentOrElse(keepFileFromDb -> {
                     KeepFile initKeePFileRoot = KeepFile.Root(null);
                     keepFileSourceComparator.compareLeftToRightSource(
-                            (file) -> cloudsFileService.collectKeepFilesByRootFile(file, source),
+                            (file) -> {
+                                try {
+                                    return cloudsFileService.collectKeepFilesByRootFile(file, source);
+                                } catch (FileDealingException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            },
                             (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
                             initKeePFileRoot,
                             keepFileFromDb,

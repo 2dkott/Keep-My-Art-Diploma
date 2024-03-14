@@ -6,7 +6,7 @@ import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.services.cloud.CloudFileRetrievalService;
 import com.kivanov.diploma.services.cloud.HttpRequestMaker;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
-import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrievalService;
+import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrieval;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -25,11 +25,11 @@ public class CloudsFileService implements FileService{
 
     public CloudsFileService(FileRepositoryService fileRepositoryService, HttpRequestMaker httpRequestMaker, UrlConfiguration urlConfiguration) {
         this.fileRepositoryService = fileRepositoryService;
-        retrievalServices.put(SourceType.YANDEX, new YandexFileRetrievalService(httpRequestMaker, urlConfiguration));
+        retrievalServices.put(SourceType.YANDEX, new YandexFileRetrieval(httpRequestMaker, urlConfiguration));
     }
 
     @Override
-    public void initRecordFiles(KeepSource cloudSources) {
+    public void initFindAndSaveAllFiles(KeepSource cloudSources) {
         log.info("Choosing cloud to fetch file data for Source {}", cloudSources);
         retrievalServices.keySet().forEach(cloudFileServiceKey -> {
             if(cloudFileServiceKey.equals(cloudSources.getType())) {
