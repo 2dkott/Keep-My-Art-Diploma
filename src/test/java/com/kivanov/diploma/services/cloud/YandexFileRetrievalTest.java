@@ -5,13 +5,12 @@ import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.services.FileRepositoryService;
-import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrievalService;
+import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrieval;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,10 +25,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @EnableConfigurationProperties(UrlConfiguration.class)
-public class YandexFileRetrievalServiceTest {
-
-    @Value("${urls.sources.yandex.root}")
-    private String resourcesUrl;
+public class YandexFileRetrievalTest {
 
     @Mock
     HttpRequestMaker httpRequestMaker;
@@ -46,8 +42,8 @@ public class YandexFileRetrievalServiceTest {
 
     static final String PARENT_URL = "parent";
     static final String PARENT_TEST_DIR_NAME = "ParentTestDirName";
-    static final String PARENT_TEST_FILE_NAME = "ParentTestFileName";
-    static final String CHILD_FILE_NAME = "ChildTestFileName";
+    static final String PARENT_TEST_FILE_NAME = "ParentTestFileName.txt";
+    static final String CHILD_FILE_NAME = "ChildTestFileName.txt";
     static final String CHILD_URL = PARENT_URL + "/" + PARENT_TEST_DIR_NAME;
     static final String TOKEN = "test_token";
     static final String PARENT_FILE_CREATION_TIME = "2021-03-06T22:07:27+00:00";
@@ -83,15 +79,15 @@ public class YandexFileRetrievalServiceTest {
     @Test
     public void testFetchCLoudFileToKeepFiles() throws IOException {
 
-        YandexFileRetrievalService yandexFileRetrievalService = new YandexFileRetrievalService(httpRequestMaker, urlConfiguration);
+        YandexFileRetrieval yandexFileRetrieval = new YandexFileRetrieval(httpRequestMaker, urlConfiguration);
         KeepSource yandexSource = new KeepSource();
         yandexSource.setType(SourceType.YANDEX);
         yandexSource.setPath(PARENT_URL);
         yandexSource.setUserToken(TOKEN);
         KeepFile rootKeeFile = KeepFile.Root(yandexSource);
 
-        List<KeepFile> actualFileList = yandexFileRetrievalService.fetchCLoudFileToKeepFiles(rootKeeFile, yandexSource, false);
-
+        List<KeepFile> actualFileList = yandexFileRetrieval.fetchCLoudFileToKeepFiles(rootKeeFile, yandexSource, false);
+        assertEquals(actualFileList.size(), 3);
         KeepFile parentFile = actualFileList.stream().filter(file -> file.getName().equals(PARENT_TEST_FILE_NAME)).findFirst().orElseThrow();
         KeepFile parentDir = actualFileList.stream().filter(file -> file.getName().equals(PARENT_TEST_DIR_NAME)).findFirst().orElseThrow();
         KeepFile childFile = actualFileList.stream().filter(file -> file.getName().equals(CHILD_FILE_NAME)).findFirst().orElseThrow();
@@ -128,15 +124,15 @@ public class YandexFileRetrievalServiceTest {
     @Test
     public void testFlatFetchCLoudFileToKeepFiles() throws IOException {
 
-        YandexFileRetrievalService yandexFileRetrievalService = new YandexFileRetrievalService(httpRequestMaker, urlConfiguration);
+        YandexFileRetrieval yandexFileRetrieval = new YandexFileRetrieval(httpRequestMaker, urlConfiguration);
         KeepSource yandexSource = new KeepSource();
         yandexSource.setType(SourceType.YANDEX);
         yandexSource.setPath(PARENT_URL);
         yandexSource.setUserToken(TOKEN);
         KeepFile rootKeeFile = KeepFile.Root(yandexSource);
 
-        List<KeepFile> actualFileList = yandexFileRetrievalService.fetchCLoudFileToKeepFiles(rootKeeFile, yandexSource, true);
-
+        List<KeepFile> actualFileList = yandexFileRetrieval.fetchCLoudFileToKeepFiles(rootKeeFile, yandexSource, true);
+        assertEquals(actualFileList.size(), 2);
         KeepFile parentFile = actualFileList.stream().filter(file -> file.getName().equals(PARENT_TEST_FILE_NAME)).findFirst().orElseThrow();
         KeepFile parentDir = actualFileList.stream().filter(file -> file.getName().equals(PARENT_TEST_DIR_NAME)).findFirst().orElseThrow();
         Assertions.assertAll(

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
-public class YandexFileRetrievalService implements CloudFileRetrievalService {
+public class YandexFileRetrieval implements CloudFileRetrievalService {
 
 
     private final HttpRequestMaker httpRequestMaker;
@@ -33,7 +33,7 @@ public class YandexFileRetrievalService implements CloudFileRetrievalService {
         return fileList;
     }
 
-    public void searchAndMapFilesToKeepFileList(ConnectionData connectionData, KeepFile parent, List<KeepFile> keepFilesStorage) throws IOException {
+    private void searchAndMapFilesToKeepFileList(ConnectionData connectionData, KeepFile parent, List<KeepFile> keepFilesStorage) throws IOException {
         List<YandexFile> yandexFiles = getFilesFromResource(connectionData);
         for (YandexFile yandexFile : yandexFiles) {
             KeepFile keepFile = yandexFile.mapToKeepFile(parent);
@@ -45,7 +45,7 @@ public class YandexFileRetrievalService implements CloudFileRetrievalService {
         }
     }
 
-    public void flatSearchAndMapFilesToKeepFileList(ConnectionData connectionData, KeepFile parent, List<KeepFile> keepFilesStorage) throws IOException {
+    private void flatSearchAndMapFilesToKeepFileList(ConnectionData connectionData, KeepFile parent, List<KeepFile> keepFilesStorage) throws IOException {
         List<YandexFile> yandexFiles = getFilesFromResource(connectionData);
         for (YandexFile yandexFile : yandexFiles) {
             KeepFile keepFile = yandexFile.mapToKeepFile(parent);
