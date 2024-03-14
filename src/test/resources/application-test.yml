@@ -1,0 +1,32 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2
+  datasource:
+    url: jdbc:h2:file:./test-keep-db
+    username:
+    password:
+    driverClassName: org.h2.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+
+
+
+services:
+  api:
+    yandex:
+      key: cbbe4732e7f64509b2c72f06e75b15cf
+      secret: 39142b3043a14d59951ee3fec132a5a3
+      scope: cloud_api:disk.read
+      app_path: disk:/Приложения/keep_my_art
+
+urls:
+  sources:
+    yandex:
+      root: https://cloud-api.yandex.net/v1/disk/resources?path=
+    google:
+      root: https://cloud-api.yandex.net/v1/disk/resources?path=
