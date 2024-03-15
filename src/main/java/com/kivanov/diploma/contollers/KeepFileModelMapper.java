@@ -23,8 +23,6 @@ public class KeepFileModelMapper {
         });
         ModelKeepFile modelKeepFile = new ModelKeepFile();
         modelKeepFile.setFile(file);
-        modelKeepFile.setFullPath(stringBuffer.toString());
-        modelKeepFile.setParentDirectory(file.getParent());
         return modelKeepFile;
     }
 

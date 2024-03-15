@@ -1,9 +1,6 @@
 package com.kivanov.diploma.services;
 
-import com.kivanov.diploma.model.KeepFile;
-import com.kivanov.diploma.model.KeepFileSourceComparator;
-import com.kivanov.diploma.model.KeepProject;
-import com.kivanov.diploma.model.KeepSource;
+import com.kivanov.diploma.model.*;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
 import com.kivanov.diploma.services.localstorage.LocalFileReadingException;
 import lombok.NonNull;
@@ -32,9 +29,10 @@ public class FileSyncService {
     @Qualifier("LocalFileService")
     FileService localFileService;
 
-    public void syncLocalFiles(KeepProject project) throws FileDealingException {
+    public SyncKeepFileData syncLocalFiles(KeepProject project) throws FileDealingException {
         syncLocalFileStorage(project.getLocalSource());
         syncCloudFileStorage(project.getCloudSource());
+        return syncCloudAndLocalStorage(project.getLocalSource(), project.getCloudSource());
     }
 
     public void initDataFromCloud(@NonNull KeepSource keepSource) throws FileDealingException {
@@ -67,7 +65,6 @@ public class FileSyncService {
                     keepFileFromDb,
                     source);
         }, () -> log.error("Root Keep File was not found in DB for Source {}", source));
-
     }
 
     private void syncCloudFileStorage(KeepSource source) throws FileDealingException {
@@ -90,7 +87,7 @@ public class FileSyncService {
                 }, () -> log.error("Root Keep File was not found in DB for Source {}", source));
     }
 
-    private void syncCloudAndLocalStorage(KeepSource localSource, KeepSource cloudSource) {
+    private SyncKeepFileData syncCloudAndLocalStorage(KeepSource localSource, KeepSource cloudSource) {
         KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
 
         KeepFile localRoot = fileRepositoryService.findRootOfSource(localSource).get();
@@ -101,5 +98,10 @@ public class FileSyncService {
                 localRoot,
                 cloudRoot,
                 cloudSource);
+        SyncKeepFileData syncData = new SyncKeepFileData();
+        syncData.setNewLocalFiles(keepFileSourceComparator.leftNotMatchedFileList);
+        syncData.setNewCloudFiles(keepFileSourceComparator.rightNotMatchedFileList);
+        syncData.setModifiedFiles(keepFileSourceComparator.modifiedFileList);
+        return syncData;
     }
 }

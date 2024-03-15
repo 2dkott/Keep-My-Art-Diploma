@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta content="light dark" name="color-scheme"/>
-    <link rel="stylesheet" th:href="@{/material.min.css}">
-    <script th:src="@{/material.min.js}"></script>
-    <link th:href="@{/material-icons-main/iconfont/material-icons.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/material_css/material.min.css}">
+    <script th:src="@{/material_css/material.min.js}"></script>
+    <link th:href="@{/node_modules/material-symbols/index.css}" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Project</title>
 </head>
@@ -38,8 +38,41 @@
     .project-card > .mdl-card__actions > .mdl-button {
         color: #fff;
     }
+
+    #tab-container{
+        margin:auto;
+        width:50%;
+    }
+
+     .material-symbols-outlined {
+         color: white;
+         font-size: 36px;
+         font-variation-settings:
+                 'FILL' 0,
+                 'wght' 300,
+                 'GRAD' 200,
+                 'opsz' 40
+     }
+
+     .page-content {
+         color:white;
+     }
+
+    li:hover {
+        background-color: #212121;
+    }
+
+    .material-symbols-outlined {
+        vertical-align:middle;
+    }
+
 </style>
 <script th:inline="javascript" type="text/javascript">
+
+    function selectByClick(element_id) {
+        document.getElementById("checkbox-" + element_id).click()
+    }
+
     function syncProject(project_id) {
         var base_url = /*[[${urls.SYNC_PROJECT}]]*/""
         this.openUrl(base_url + "/" + project_id);
@@ -54,15 +87,38 @@
     }
 </script>
 <body>
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header
+            mdl-layout--fixed-tabs">
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
-            <span class="mdl-layout-title">Проекты</span>
+            <span class="mdl-layout-title" th:text="${project.getName()}">Проекты</span>
+            <ul>
+                <li th:text="|Локальное хранилище: ${project.getLocalSource().getPath()}|"></li>
+                <li th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></li>
+            </ul>
             <div class="mdl-layout-spacer"></div>
             <nav class="mdl-navigation mdl-layout--large-screen-only">
                 <a class="mdl-navigation__link" th:href="@{|/${urls.HOME}|}">Home</a>
             </nav>
         </div>
+            <div id="tab-container" class="mdl-layout__tab-bar mdl-js-ripple-effect">
+                <a href="#all-tab" class="mdl-layout__tab is-active">Все</a>
+                <a href="#new_tab" class="mdl-layout__tab">Новые</a>
+                <a href="#modif-tab" class="mdl-layout__tab">Измененные</a>
+                <a href="#fixed-tab-3" class="mdl-layout__tab">Удаленные</a>
+                    <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent" style="display: flex;justify-content: center;align-items: center;"
+                       th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                        <i class="material-symbols-outlined" >sync</i>
+                    </button>
+                    <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent" style="display: flex;justify-content: center;align-items: center;"
+                            th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                        <i class="material-symbols-outlined" >cloud_upload</i>
+                    </button>
+                    <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent" style="display: flex;justify-content: center;align-items: center;"
+                            th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                        <i class="material-symbols-outlined" >cloud_download</i>
+                    </button>
+            </div>
     </header>
     <div class="mdl-layout__drawer">
         <span class="mdl-layout-title">Проекты</span>
@@ -75,25 +131,99 @@
             <div class="mdl-grid">
                 <div class="mdl-cell mdl-cell--2-col"></div>
                 <div class="mdl-cell mdl-cell--8-col">
-                    <div class="project-card mdl-card mdl-shadow--2dp">
-                        <div class="mdl-card__title mdl-card--expand">
-                                <span class="mdl-card__title-text" th:text="${project.getName()}"></span>
-                        </div>
-                        <div class="mdl-card__supporting-text">
-                            <ul>
-                                <li th:text="|Локальное хранилище: ${project.getLocalSource().getPath()}|"></li>
-                                <li th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></li>
+                    <section class="mdl-layout__tab-panel is-active" id="all-tab">
+                        <div class="page-content">
+                            <ul class="demo-list-control mdl-list">
+                                <li class="mdl-list__item mdl-list__item--two-line" th:each="file : ${allFiles}" >
+                                     <span class="mdl-list__item-primary-content" th:onclick="'selectByClick(' + ${file.getFile().getId()} + ')'" style="cursor: pointer">
+                                        <div style="vertical-align: bottom">
+                                            <span style="color:white;" th:text="|${file.getFileName()}|"></span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span th:if="${file.isCloud()}" style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">cloud</span>
+                                            <span th:if="${!file.isCloud()}" style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">hard_drive_2</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">schedule</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;" th:text="|${file.getCreationDateTime()}|"></span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">update</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;" th:text="|${file.getModificationDateTime()}|"></span>
+                                        </div>
+
+                                         <span class="mdl-list__item-sub-title" style="color:darkgray;" th:text="|${file.getFilePath()}|"></span>
+                                    </span>
+                                    <span class="mdl-list__item-secondary-action">
+                                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" th:for="|checkbox-${file.getFile().getId()}|">
+                                          <input type="checkbox" th:id="|checkbox-${file.getFile().getId()}|" class="mdl-checkbox__input">
+                                        </label>
+                                    </span>
+                                </li>
                             </ul>
                         </div>
-                        <div class="mdl-card__actions mdl-card--border">
-                            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-                               th:onclick="'syncProject(' + ${project.getId()} + ')'">Синхронизировать</a>
-                            <div class="mdl-layout-spacer"></div>
+                    </section>
+                    <section class="mdl-layout__tab-panel" id="new_tab">
+                        <div class="page-content">
+                            <li class="mdl-list__item mdl-list__item--two-line" th:each="file : ${newLocalFiles}" >
+                                     <span class="mdl-list__item-primary-content" th:onclick="'selectByClick(' + ${file.getFile().getId()} + ')'" style="cursor: pointer">
+                                        <div style="vertical-align: bottom">
+                                            <span style="color:white;" th:text="|${file.getFileName()}|"></span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span th:if="${file.isCloud()}" style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">cloud</span>
+                                            <span th:if="${!file.isCloud()}" style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">hard_drive_2</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">schedule</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;" th:text="|${file.getCreationDateTime()}|"></span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">update</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;" th:text="|${file.getModificationDateTime()}|"></span>
+                                        </div>
+
+                                         <span class="mdl-list__item-sub-title" style="color:darkgray;" th:text="|${file.getFilePath()}|"></span>
+                                    </span>
+                                    <span class="mdl-list__item-secondary-action">
+                                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" th:for="|checkbox-${file.getFile().getId()}|">
+                                              <input type="checkbox" th:id="|checkbox-${file.getFile().getId()}|" class="mdl-checkbox__input">
+                                            </label>
+                                    </span>
+                            </li>
                         </div>
-                    </div>
-                    <ul>
-                        <li th:each="file : ${files}" th:text="|${file.getFile().getName()} ${file.getFullPath()}|"></li>
-                    </ul>
+                    </section>
+                    <section class="mdl-layout__tab-panel" id="modif-tab">
+                        <div class="page-content">
+                            <li class="mdl-list__item mdl-list__item--two-line" th:each="file : ${newCloudFiles}" >
+                                     <span class="mdl-list__item-primary-content" th:onclick="'selectByClick(' + ${file.getFile().getId()} + ')'" style="cursor: pointer">
+                                        <div style="vertical-align: bottom">
+                                            <span style="color:white;" th:text="|${file.getFileName()}|"></span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span th:if="${file.isCloud()}" style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">cloud</span>
+                                            <span th:if="${!file.isCloud()}" style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">hard_drive_2</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">schedule</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;" th:text="|${file.getCreationDateTime()}|"></span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;">|</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;bottom: 0;" class="material-symbols-outlined">update</span>
+                                            <span style="color:darkgray;font-size:14px;font-weight:400;" th:text="|${file.getModificationDateTime()}|"></span>
+                                        </div>
+
+                                         <span class="mdl-list__item-sub-title" style="color:darkgray;" th:text="|${file.getFilePath()}|"></span>
+                                    </span>
+                                <span class="mdl-list__item-secondary-action">
+                                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" th:for="|checkbox-${file.getFile().getId()}|">
+                                              <input type="checkbox" th:id="|checkbox-${file.getFile().getId()}|" class="mdl-checkbox__input">
+                                            </label>
+                                    </span>
+                            </li>
+                        </div>
+                    </section>
+                    <section class="mdl-layout__tab-panel" id="scroll-tab-4">
+                        <div class="page-content"><!-- Your content goes here --></div>
+                    </section>
+                    <section class="mdl-layout__tab-panel" id="scroll-tab-5">
+                        <div class="page-content"><!-- Your content goes here --></div>
+                    </section>
+                    <section class="mdl-layout__tab-panel" id="scroll-tab-6">
+                        <div class="page-content"><!-- Your content goes here --></div>
+                    </section>
+
                 </div>
                 <div class="mdl-cell mdl-cell--2-col"></div>
             </div>
