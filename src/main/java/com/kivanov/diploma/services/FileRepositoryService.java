@@ -46,15 +46,16 @@ public class FileRepositoryService {
         });
     }
 
-    public List<KeepFile> findALlFilesBYParent(KeepFile parent) {
-        return fileRepository.findKeepFileByParent(parent);
-    }
     public List<KeepFile> findALlFilesBySource(KeepSource source) {
         return fileRepository.findKeepFilesBySource(source);
     }
 
     public List<KeepFile> findNotDeletedFilesByParent(KeepFile parent) {
         return fileRepository.findKeepFileByParent(parent).stream().filter(keepFile -> !keepFile.isDeleted()).toList();
+    }
+
+    public List<KeepFile> findNotDeletedFilesByParentAndSource(KeepFile parent, KeepSource source) {
+        return fileRepository.findKeepFilesByParentAndSource(parent, source).stream().filter(keepFile -> !keepFile.isDeleted()).toList();
     }
 
     public Optional<KeepFile> findRootOfSource(KeepSource source) {

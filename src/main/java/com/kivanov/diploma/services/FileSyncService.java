@@ -2,7 +2,6 @@ package com.kivanov.diploma.services;
 
 import com.kivanov.diploma.model.*;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
-import com.kivanov.diploma.services.localstorage.LocalFileReadingException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,8 +92,8 @@ public class FileSyncService {
         KeepFile localRoot = fileRepositoryService.findRootOfSource(localSource).get();
         KeepFile cloudRoot = fileRepositoryService.findRootOfSource(cloudSource).get();
         keepFileSourceComparator.compareLeftToRightSource(
-                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
-                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
+                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParentAndSource(file, localSource),
+                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParentAndSource(file, cloudSource),
                 localRoot,
                 cloudRoot,
                 cloudSource);

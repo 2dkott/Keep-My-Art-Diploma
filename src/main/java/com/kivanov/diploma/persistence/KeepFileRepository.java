@@ -10,9 +10,11 @@ public interface KeepFileRepository extends CrudRepository<KeepFile, Long> {
     List<KeepFile> findKeepFileBySource(KeepSource source);
 
     List<KeepFile> findKeepFileByParent(KeepFile parent);
+
+    List<KeepFile> findKeepFilesByParentAndSource(KeepFile parent, KeepSource source);
+
     List<KeepFile> findKeepFilesBySource(KeepSource source);
 
-    List<KeepFile> findKeepFileByNameAndSource(String name, KeepSource source);
     List<KeepFile> findKeepFilesByIsRootAndSource(boolean root, KeepSource source);
 
 }
