@@ -52,7 +52,7 @@ public class KeepFileSourceComparator {
                                 compareLeftToRightSource(leftSourceProvider,
                                         rightSourceProvider,
                                         leftFile,
-                                        keepFile,
+                                        leftFile,
                                         source);
                         }
                     },
