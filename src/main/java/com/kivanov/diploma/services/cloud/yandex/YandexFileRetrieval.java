@@ -8,11 +8,13 @@ import com.kivanov.diploma.services.cloud.HttpRequestMaker;
 import com.kivanov.diploma.services.cloud.JsonMapper;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @AllArgsConstructor
 public class YandexFileRetrieval implements CloudFileRetrievalService {
 
@@ -39,8 +41,10 @@ public class YandexFileRetrieval implements CloudFileRetrievalService {
             KeepFile keepFile = yandexFile.mapToKeepFile(parent);
             keepFilesStorage.add(keepFile);
             if (yandexFile.isDirectory()) {
-                connectionData.setUrl(connectionData.getUrl() + "/" + yandexFile.getName());
-                searchAndMapFilesToKeepFileList(connectionData, keepFile, keepFilesStorage);
+                ConnectionData childConnectionData = new ConnectionData();
+                childConnectionData.setOauthToken(connectionData.getOauthToken());
+                childConnectionData.setUrl(connectionData.getUrl() + "/" + yandexFile.getName());
+                searchAndMapFilesToKeepFileList(childConnectionData, keepFile, keepFilesStorage);
             }
         }
     }
@@ -54,7 +58,10 @@ public class YandexFileRetrieval implements CloudFileRetrievalService {
     }
 
     public List<YandexFile> getFilesFromResource(ConnectionData connectionData) throws IOException {
+        log.info("Retrieving files data from url {}", connectionData.getUrl());
         String jsonResponse = httpRequestMaker.getResponse(connectionData.getUrl(), connectionData.getOauthToken());
-        return JsonMapper.mapJsonToYandexFiles(jsonResponse);
+        List<YandexFile> yandexFileList = JsonMapper.mapJsonToYandexFiles(jsonResponse);
+        log.info("Files were retrieved: {}", yandexFileList);
+        return yandexFileList;
     }
 }

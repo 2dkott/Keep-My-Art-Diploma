@@ -1,37 +1,27 @@
 package com.kivanov.diploma.contollers;
 
 import com.kivanov.diploma.model.KeepFile;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Component
 public class KeepFileModelMapper {
 
-    public List<ModelKeepFile> getFileList(List<KeepFile> fileList) {
-        return fileList.stream().filter(keepFile -> !keepFile.isDirectory()).map(this::mapToModel).toList();
+    public List<KeepFileModel> mapToKeepFileModelList(List<KeepFile> fileList) {
+        return fileList.stream().filter(keepFile -> !keepFile.isDirectory()).map(this::mapKeepFileToKeepFileModel).toList();
     }
 
-    public ModelKeepFile mapToModel(KeepFile file) {
-        StringBuffer stringBuffer = new StringBuffer();
-        List<KeepFile> parents = new ArrayList<>();
-        buildPath(parents, file);
-        parents.reversed().stream().filter(keepFile -> !Objects.isNull(keepFile.getName())).forEach(keepFile -> {
-            stringBuffer.append("/").append(keepFile.getName());
-        });
-        ModelKeepFile modelKeepFile = new ModelKeepFile();
-        modelKeepFile.setFile(file);
-        return modelKeepFile;
+    public List<Pair<KeepFileModel, KeepFileModel>> mapToKeepFileModelPairList(List<Pair<KeepFile,KeepFile>> fileList) {
+        return fileList.stream()
+                .filter(keepFileKeepFilePair -> !keepFileKeepFilePair.getLeft().isDirectory())
+                .map(keepFileKeepFilePair -> Pair.of(mapKeepFileToKeepFileModel(keepFileKeepFilePair.getLeft()), mapKeepFileToKeepFileModel(keepFileKeepFilePair.getRight()))).toList();
     }
 
-    private void buildPath(List<KeepFile> parents, KeepFile keepFile) {
-        KeepFile parent = keepFile.getParent();
-        if (!Objects.isNull(parent)) {
-            parents.add(parent);
-            buildPath(parents, parent);
-        }
+    public KeepFileModel mapKeepFileToKeepFileModel(KeepFile file) {
+        KeepFileModel keepFileModel = new KeepFileModel();
+        keepFileModel.setFile(file);
+        return keepFileModel;
     }
-
 }

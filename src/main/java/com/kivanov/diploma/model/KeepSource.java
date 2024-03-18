@@ -39,4 +39,9 @@ public class KeepSource {
     public boolean isCloud() {
         return !type.equals(SourceType.LOCAL);
     }
+
+    @Override
+    public String toString() {
+        return String.format("id:%s,type:%s", id, type);
+    }
 }

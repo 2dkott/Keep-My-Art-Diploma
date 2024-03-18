@@ -3,6 +3,7 @@ package com.kivanov.diploma.services.cloud.yandex;
 import com.kivanov.diploma.model.KeepFile;
 import com.kivanov.diploma.services.SyncFile;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,5 +43,10 @@ public class YandexFile implements SyncFile {
         file.setSource(parent.getSource());
         file.setParent(parent);
         return file;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("name:%s, type:%s", name, type);
     }
 }

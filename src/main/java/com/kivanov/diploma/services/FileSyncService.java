@@ -35,7 +35,7 @@ public class FileSyncService {
     }
 
     public void initDataFromCloud(@NonNull KeepSource keepSource) throws FileDealingException {
-        log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
+        log.error("Attempt to init file recording from Cloud Storage '{}'", keepSource.getPath());
         Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
         if(rootKeepFile.isEmpty()) cloudsFileService.initFindAndSaveAllFiles(keepSource);
     }
