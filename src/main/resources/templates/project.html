@@ -4,42 +4,75 @@
     <meta charset="utf-8">
     <meta content="width=device-width, initial-scale=1" name="viewport">
     <meta content="light dark" name="color-scheme"/>
-    <link rel="stylesheet" th:href="@{/material.min.css}">
-    <script th:src="@{/material.min.js}"></script>
-    <link th:href="@{/material-icons-main/iconfont/material-icons.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/material_css/material.min.css}">
+    <script th:src="@{/material_css/material.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/node_modules/material-symbols/index.css}">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>Project</title>
 </head>
 <style>
-    .project-card.mdl-card {
-        width: 100%;
-        background: #3E4EB8;
-    }
-    .project-card > .mdl-card__actions {
-        border-color: rgba(255, 255, 255, 0.2);
-    }
-    .project-card > .mdl-card__title {
-        align-items: flex-start;
-    }
-    .project-card > .mdl-card__title > .mdl-card__title-text {
-        font-size:20px;
-    }
     .project-card > .mdl-card__title .mdl-card__title > h4 {
         margin-top: 0;
     }
-    .project-card > .mdl-card__actions {
-        display: flex;
-        box-sizing:border-box;
-        align-items: center;
+
+    li:hover {
+        background-color: #212121;
     }
-    .project-card > .mdl-card__title,
-    .project-card > .mdl-card__supporting-text,
-    .project-card > .mdl-card__actions,
-    .project-card > .mdl-card__actions > .mdl-button {
-        color: #fff;
+
+    .mdl-data-table th {
+        color: #3f51b5;
+        text-align: left;
+        vertical-align: middle;
+        font-size: 16px;
+        font-weight: 600;
     }
+
+    .mdl-data-table td {
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .list-file-data-container > div > span {
+        vertical-align: middle;
+        color: darkgray;
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .mdl-data-table tbody tr.is-selected {
+        background-color: #212121;
+    }
+    .mdl-data-table tbody tr:hover {
+        background-color: #212121;
+    }
+    .mdl-data-table th {
+        color: white;
+    }
+
+    .mdl-data-table td:first-of-type, .mdl-data-table th:first-of-type {
+        padding-right: 0;
+        text-align: right;
+    }
+
+
+
 </style>
 <script th:inline="javascript" type="text/javascript">
+
+    function selectByClick(element) {
+        element.parentElement.querySelector("input").click();
+    }
+
+    function resetCheckedInbox() {
+        let checkBoxes = document.getElementsByClassName("mdl-checkbox__input");
+        for (const child of checkBoxes) {
+            if(child.checked) {
+                child.click();
+            }
+        }
+
+    }
+
     function syncProject(project_id) {
         var base_url = /*[[${urls.SYNC_PROJECT}]]*/""
         this.openUrl(base_url + "/" + project_id);
@@ -49,19 +82,44 @@
         var base_url = /*[[${urls.NEW_PROJECT}]]*/""
         this.openUrl(base_url);
     }
+
     function openUrl(url) {
         window.open(url, "_self");
     }
 </script>
 <body>
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header
+            mdl-layout--fixed-tabs">
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
-            <span class="mdl-layout-title">Проекты</span>
+            <span class="mdl-layout-title" th:text="${project.getName()}">Проекты</span>
+            <ul>
+                <li th:text="|Локальное хранилище: ${project.getLocalSource().getPath()}|"></li>
+                <li th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></li>
+            </ul>
             <div class="mdl-layout-spacer"></div>
             <nav class="mdl-navigation mdl-layout--large-screen-only">
                 <a class="mdl-navigation__link" th:href="@{|/${urls.HOME}|}">Home</a>
             </nav>
+        </div>
+        <div class="mdl-layout__tab-bar mdl-js-ripple-effect" id="tab-container">
+            <a class="mdl-layout__tab" href="#new_tab" onclick="resetCheckedInbox()">Новые</a>
+            <a class="mdl-layout__tab" href="#modif-tab" onclick="resetCheckedInbox()">Измененные</a>
+            <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
+                    style="display: flex;justify-content: center;align-items: center;"
+                    th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                <i class="material-symbols-outlined">sync</i>
+            </button>
+            <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
+                    style="display: flex;justify-content: center;align-items: center;"
+                    th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                <i class="material-symbols-outlined">cloud_upload</i>
+            </button>
+            <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
+                    style="display: flex;justify-content: center;align-items: center;"
+                    th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                <i class="material-symbols-outlined">cloud_download</i>
+            </button>
         </div>
     </header>
     <div class="mdl-layout__drawer">
@@ -75,25 +133,45 @@
             <div class="mdl-grid">
                 <div class="mdl-cell mdl-cell--2-col"></div>
                 <div class="mdl-cell mdl-cell--8-col">
-                    <div class="project-card mdl-card mdl-shadow--2dp">
-                        <div class="mdl-card__title mdl-card--expand">
-                                <span class="mdl-card__title-text" th:text="${project.getName()}"></span>
+                    <section class="mdl-layout__tab-panel" id="new_tab">
+                        <div class="page-content" th:insert="~{fragments/general.html :: simple-file-table(fileList=${allFiles})}">
                         </div>
-                        <div class="mdl-card__supporting-text">
-                            <ul>
-                                <li th:text="|Локальное хранилище: ${project.getLocalSource().getPath()}|"></li>
-                                <li th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></li>
-                            </ul>
-                        </div>
-                        <div class="mdl-card__actions mdl-card--border">
-                            <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
-                               th:onclick="'syncProject(' + ${project.getId()} + ')'">Синхронизировать</a>
-                            <div class="mdl-layout-spacer"></div>
-                        </div>
-                    </div>
-                    <ul>
-                        <li th:each="file : ${files}" th:text="|${file.getFile().getName()} ${file.getFullPath()}|"></li>
-                    </ul>
+                    </section>
+                    <section class="mdl-layout__tab-panel" id="modif-tab">
+                        <div class="page-content">
+                            <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable" style="background-color: transparent; width:100%">
+                                <thead>
+                                <tr>
+                                    <th class="mdl-data-table__cell--non-numeric" style="color: #3f51b5;">Файл</th>
+                                    <th style="color: #3f51b5;">Изменен</th>
+                                    <th style="color: #3f51b5;">Размер</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="file : ${modifiedFiles}">
+                                    <td class="mdl-data-table__cell--non-numeric" onclick="selectByClick(this)">
+                                        <div class="list-file-data-table">
+                                            <span class="list-file-data-table-title" th:text="|${file.getLeft().getFileName()}|"></span>
+                                            <span class="list-file-data-table-subtitle" th:text="|${file.getLeft().getFilePath()}|"></span>
+                                        </div>
+                                    </td>
+                                    <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
+                                        <div class="list-file-data-table" >
+                                            <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.getLeft().isCloud()},fileTime=${file.getLeft().getModificationDateTime()})}"></div>
+                                            <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.getRight().isCloud()},fileTime=${file.getRight().getModificationDateTime()})}"></div>
+                                        </div>
+                                    </td>
+                                    <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
+                                        <div class="list-file-data-table">
+                                            <span class="list-file-data-table-subtitle" th:text="|${file.getLeft().getModificationDateTime()}|"></span>
+                                            <span class="list-file-data-table-subtitle" th:text="|${file.getRight().getCreationDateTime()}|"></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                         </div>
+                    </section>
                 </div>
                 <div class="mdl-cell mdl-cell--2-col"></div>
             </div>

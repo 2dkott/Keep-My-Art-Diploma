@@ -9,9 +9,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,18 +93,28 @@ public class ProjectController {
                               Model model) throws NoKeepProjectException {
         KeepProject project = projectService.findProjectById(projectId);
         List<KeepSource> sources = project.getKeepSources().stream().toList();
+        SyncKeepFileData syncKeepFileData = (SyncKeepFileData) model.getAttribute("syncData");
         model.addAttribute("project", project);
         model.addAttribute("cloudSources", sources);
-        model.addAttribute("projectFiles", fileRepositoryService.getProjectOnlyFiles(project));
-        model.addAttribute("files", keepFileModelMapper.getFileList(fileRepositoryService.getProjectOnlyFiles(project)));
+        model.addAttribute("files", keepFileModelMapper.mapToKeepFileModelList(fileRepositoryService.getProjectOnlyFiles(project)));
+        List<KeepFile> allList = new ArrayList<>();
+        allList.addAll(syncKeepFileData.getNewLocalFiles());
+        allList.addAll(syncKeepFileData.getNewCloudFiles());
+
+
+        model.addAttribute("allFiles", keepFileModelMapper.mapToKeepFileModelList(allList));
+        model.addAttribute("newLocalFiles", keepFileModelMapper.mapToKeepFileModelList(syncKeepFileData.getNewLocalFiles()));
+        model.addAttribute("newCloudFiles", keepFileModelMapper.mapToKeepFileModelList(syncKeepFileData.getNewCloudFiles()));
+        model.addAttribute("modifiedFiles", keepFileModelMapper.mapToKeepFileModelPairList(syncKeepFileData.getModifiedFiles()));
         return "project";
     }
 
     @GetMapping("/" + WebUrls.SYNC + "/{projectId}")
-    public RedirectView syncProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException, IOException, FileDealingException {
+    public String syncProject(@PathVariable("projectId") long projectId,
+                              RedirectAttributes redirectAttrs) throws NoKeepProjectException, FileDealingException {
         KeepProject project = projectService.findProjectById(projectId);
-        fileSyncService.syncLocalFiles(project);
-        return new RedirectView("/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId);
+        redirectAttrs.addFlashAttribute("syncData", fileSyncService.syncLocalFiles(project));
+        return "redirect:/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId;
     }
 
     @ModelAttribute("newProjectSession")
@@ -116,6 +126,10 @@ public class ProjectController {
     @ModelAttribute("urls")
     public WebUrls urls() {
         return new WebUrls();
+    }
+    @ModelAttribute("syncData")
+    public SyncKeepFileData syncData() {
+        return new SyncKeepFileData();
     }
 
 }

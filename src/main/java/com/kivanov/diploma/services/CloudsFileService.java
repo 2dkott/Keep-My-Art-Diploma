@@ -43,8 +43,8 @@ public class CloudsFileService implements FileService{
                         fileRepositoryService.saveKeepFileListByParent(rootKeepFile, fileList);
                         log.info("File List was saved in DB");
                 } catch (IOException e) {
-                    log.info("Fetching Data from Cloud of Source {} was failed:", cloudSources);
-                    log.info(e.getMessage());
+                    log.error("Fetching Data from Cloud of Source {} was failed:", cloudSources);
+                    log.error(e.getMessage());
                 }
             }
         });

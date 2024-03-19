@@ -1,11 +1,7 @@
 package com.kivanov.diploma.services;
 
-import com.kivanov.diploma.model.KeepFile;
-import com.kivanov.diploma.model.KeepFileSourceComparator;
-import com.kivanov.diploma.model.KeepProject;
-import com.kivanov.diploma.model.KeepSource;
+import com.kivanov.diploma.model.*;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
-import com.kivanov.diploma.services.localstorage.LocalFileReadingException;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +28,14 @@ public class FileSyncService {
     @Qualifier("LocalFileService")
     FileService localFileService;
 
-    public void syncLocalFiles(KeepProject project) throws FileDealingException {
+    public SyncKeepFileData syncLocalFiles(KeepProject project) throws FileDealingException {
         syncLocalFileStorage(project.getLocalSource());
         syncCloudFileStorage(project.getCloudSource());
+        return syncCloudAndLocalStorage(project.getLocalSource(), project.getCloudSource());
     }
 
     public void initDataFromCloud(@NonNull KeepSource keepSource) throws FileDealingException {
-        log.error("Attempt to init file recording from Local Storage '{}'", keepSource.getPath());
+        log.error("Attempt to init file recording from Cloud Storage '{}'", keepSource.getPath());
         Optional<KeepFile> rootKeepFile = fileRepositoryService.findRootOfSource(keepSource);
         if(rootKeepFile.isEmpty()) cloudsFileService.initFindAndSaveAllFiles(keepSource);
     }
@@ -67,7 +64,6 @@ public class FileSyncService {
                     keepFileFromDb,
                     source);
         }, () -> log.error("Root Keep File was not found in DB for Source {}", source));
-
     }
 
     private void syncCloudFileStorage(KeepSource source) throws FileDealingException {
@@ -90,16 +86,21 @@ public class FileSyncService {
                 }, () -> log.error("Root Keep File was not found in DB for Source {}", source));
     }
 
-    private void syncCloudAndLocalStorage(KeepSource localSource, KeepSource cloudSource) {
+    private SyncKeepFileData syncCloudAndLocalStorage(KeepSource localSource, KeepSource cloudSource) {
         KeepFileSourceComparator keepFileSourceComparator = new KeepFileSourceComparator();
 
         KeepFile localRoot = fileRepositoryService.findRootOfSource(localSource).get();
         KeepFile cloudRoot = fileRepositoryService.findRootOfSource(cloudSource).get();
         keepFileSourceComparator.compareLeftToRightSource(
-                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
-                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParent(file),
+                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParentAndSource(file, localSource),
+                (file) -> Objects.isNull(file.getId()) ? new ArrayList<>() : fileRepositoryService.findNotDeletedFilesByParentAndSource(file, cloudSource),
                 localRoot,
                 cloudRoot,
                 cloudSource);
+        SyncKeepFileData syncData = new SyncKeepFileData();
+        syncData.setNewLocalFiles(keepFileSourceComparator.leftNotMatchedFileList);
+        syncData.setNewCloudFiles(keepFileSourceComparator.rightNotMatchedFileList);
+        syncData.setModifiedFiles(keepFileSourceComparator.modifiedFileList);
+        return syncData;
     }
 }
