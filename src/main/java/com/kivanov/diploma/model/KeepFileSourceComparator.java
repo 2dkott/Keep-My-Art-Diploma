@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Data
@@ -17,7 +18,7 @@ public class KeepFileSourceComparator {
     public List<KeepFile> rightNotMatchedFileList = new ArrayList<>();
     public List<Pair<KeepFile, KeepFile>> modifiedFileList = new ArrayList<>();
 
-    public void compareLeftToRightSource(Function<KeepFile, List<KeepFile>> leftSourceProvider, Function<KeepFile, List<KeepFile>> rightSourceProvider, KeepFile leftRoot, KeepFile rightRoot, KeepSource source) {
+    public void compareLeftToRightSource(Function<KeepFile, List<KeepFile>> leftSourceProvider, Function<KeepFile, List<KeepFile>> rightSourceProvider, BiFunction<KeepFile, KeepFile, Boolean> compareProvider, KeepFile leftRoot, KeepFile rightRoot, KeepSource source) {
 
         List<KeepFile> leftFileList = leftSourceProvider.apply(leftRoot);
         List<KeepFile> rightFileList = rightSourceProvider.apply(rightRoot);
@@ -34,9 +35,7 @@ public class KeepFileSourceComparator {
             rightFile.ifPresentOrElse(keepFile -> {
                         log.info("Right File {} was found", keepFile);
                         if(!leftFile.isDirectory()) {
-                            if(!keepFile.getSha256().equals(leftFile.getSha256())
-                                    || !keepFile.getCreationDateTime().equals(leftFile.getCreationDateTime())
-                                    || !keepFile.getModifiedDateTime().equals(leftFile.getModifiedDateTime())) {
+                            if(!compareProvider.apply(leftFile, keepFile)) {
                                 log.info("Left and Right File are different");
                                 log.info("Left Sha256 and Right Sha256: {} - {}", leftFile.getSha256(), keepFile.getSha256() );
                                 log.info("Left CreationDateTime and Right CreationDateTime: {} - {}", leftFile.getCreationDateTime(), keepFile.getCreationDateTime());
@@ -51,6 +50,7 @@ public class KeepFileSourceComparator {
                                 log.info("Go in Right File {} Directory", leftFile);
                                 compareLeftToRightSource(leftSourceProvider,
                                         rightSourceProvider,
+                                        compareProvider,
                                         leftFile,
                                         keepFile,
                                         source);
@@ -66,6 +66,7 @@ public class KeepFileSourceComparator {
                             log.info("Go in Left File {} Directory", leftFile);
                             compareLeftToRightSource(leftSourceProvider,
                                                      rightSourceProvider,
+                                                     compareProvider,
                                                      leftFile,
                                                      leftFile,
                                                      source);
@@ -87,6 +88,7 @@ public class KeepFileSourceComparator {
                     log.info("Go in Right File {} Directory", rightFile);
                     compareLeftToRightSource(leftSourceProvider,
                                              rightSourceProvider,
+                                             compareProvider,
                                              rightFile,
                                              rightFile,
                                              source);
