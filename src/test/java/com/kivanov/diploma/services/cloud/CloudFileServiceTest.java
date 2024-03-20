@@ -75,8 +75,8 @@ public class CloudFileServiceTest {
                 .replace("%childFileSha5%", CHILD_FILE_SHA_5);
 
 
-        when(httpRequestMaker.getResponse(urlConfiguration.getYandex().getRoot() + PARENT_URL, TOKEN)).thenReturn(jsonParent);
-        when(httpRequestMaker.getResponse(urlConfiguration.getYandex().getRoot() + CHILD_URL, TOKEN)).thenReturn(jsonChild);
+        when(httpRequestMaker.getGetResponseBody(urlConfiguration.getYandex().getRoot() + PARENT_URL, TOKEN)).thenReturn(jsonParent);
+        when(httpRequestMaker.getGetResponseBody(urlConfiguration.getYandex().getRoot() + CHILD_URL, TOKEN)).thenReturn(jsonChild);
     }
     @Test
     public void testInitFindAndSaveAllFiles() {

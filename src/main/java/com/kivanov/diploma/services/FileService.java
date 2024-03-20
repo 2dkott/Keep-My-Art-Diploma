@@ -11,4 +11,7 @@ public interface FileService {
     void initFindAndSaveAllFiles(KeepSource source) throws FileDealingException;
 
     List<KeepFile> collectKeepFilesByRootFile(KeepFile rootPath, KeepSource keepSource) throws FileDealingException;
+    void uploadFile(KeepFile keepFile, KeepSource keepSource);
+
+    void downloadFile(KeepFile keepFile, KeepSource keepSource);
 }

@@ -20,13 +20,13 @@ public class ServicesConfiguration {
     @Autowired
     FileRepositoryService fileRepositoryService;
 
-    @Bean("LocalFileService")
-    public FileService localFileService() {
+    @Bean
+    public LocalFileService localFileService() {
         return new LocalFileService(fileRepositoryService);
     }
 
-    @Bean("CloudsFileService")
-    public FileService cloudsFileService() {
+    @Bean
+    public CloudsFileService cloudsFileService() {
         return new CloudsFileService(fileRepositoryService, new HttpRequestMaker(), urlConfiguration);
     }
 }

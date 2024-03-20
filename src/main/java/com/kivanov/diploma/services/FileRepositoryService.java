@@ -50,6 +50,11 @@ public class FileRepositoryService {
         return fileRepository.findKeepFilesBySource(source);
     }
 
+    public Optional<KeepFile> findFileByPathIdAndSource(KeepFile keepFile, KeepSource source) {
+        List<KeepFile> result = fileRepository.findKeepFilesByPathIdAndSource(keepFile.getPathId(), source);
+        return result.stream().filter(keepFile1 -> !keepFile1.isDeleted()).findFirst();
+    }
+
     public List<KeepFile> findNotDeletedFilesByParent(KeepFile parent) {
         return fileRepository.findKeepFileByParent(parent).stream().filter(keepFile -> !keepFile.isDeleted()).toList();
     }

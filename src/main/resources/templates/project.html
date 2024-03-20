@@ -15,8 +15,45 @@
         margin-top: 0;
     }
 
+    #tab-container {
+        margin: auto;
+        width: 50%;
+    }
+
+    .material-symbols-outlined {
+        color: white;
+        font-size: 36px;
+        font-variation-settings: 'FILL' 0,
+        'wght' 300,
+        'GRAD' 200,
+        'opsz' 40
+    }
+
     li:hover {
         background-color: #212121;
+    }
+
+    .material-symbols-outlined {
+        vertical-align: middle;
+    }
+
+    .list-file-data-table {
+        display: inline-grid;
+        grid-template-columns: auto;
+    }
+
+    .list-file-data-table-title {
+        vertical-align: middle;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .list-file-data-table-subtitle {
+        vertical-align: middle;
+        color: darkgray;
+        font-size: 14px;
+        font-weight: 400;
     }
 
     .mdl-data-table th {
@@ -32,6 +69,12 @@
         vertical-align: middle;
     }
 
+    .list-file-data-container {
+        display: inline-grid;
+        grid-template-columns: auto auto;
+        grid-column-gap: 5px;
+    }
+
     .list-file-data-container > div > span {
         vertical-align: middle;
         color: darkgray;
@@ -39,12 +82,18 @@
         font-weight: 400;
     }
 
+    .mdl-list__item-sub-title, .mdl-list__item-text-body {
+        color: darkgray !important;
+    }
+
     .mdl-data-table tbody tr.is-selected {
         background-color: #212121;
     }
+
     .mdl-data-table tbody tr:hover {
         background-color: #212121;
     }
+
     .mdl-data-table th {
         color: white;
     }
@@ -53,7 +102,6 @@
         padding-right: 0;
         text-align: right;
     }
-
 
 
 </style>
@@ -66,7 +114,7 @@
     function resetCheckedInbox() {
         let checkBoxes = document.getElementsByClassName("mdl-checkbox__input");
         for (const child of checkBoxes) {
-            if(child.checked) {
+            if (child.checked) {
                 child.click();
             }
         }
@@ -112,12 +160,13 @@
             </button>
             <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
                     style="display: flex;justify-content: center;align-items: center;"
-                    th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                    type="submit" form="file-submit">
                 <i class="material-symbols-outlined">cloud_upload</i>
             </button>
             <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
                     style="display: flex;justify-content: center;align-items: center;"
-                    th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                    th:formaction="@{|${urls.DOWNLOAD_PROJECT}/${project.getId()}|}"
+                    form="file-submit">
                 <i class="material-symbols-outlined">cloud_download</i>
             </button>
         </div>
@@ -133,45 +182,100 @@
             <div class="mdl-grid">
                 <div class="mdl-cell mdl-cell--2-col"></div>
                 <div class="mdl-cell mdl-cell--8-col">
-                    <section class="mdl-layout__tab-panel" id="new_tab">
-                        <div class="page-content" th:insert="~{fragments/general.html :: simple-file-table(fileList=${allFiles})}">
-                        </div>
-                    </section>
-                    <section class="mdl-layout__tab-panel" id="modif-tab">
-                        <div class="page-content">
-                            <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable" style="background-color: transparent; width:100%">
-                                <thead>
-                                <tr>
-                                    <th class="mdl-data-table__cell--non-numeric" style="color: #3f51b5;">Файл</th>
-                                    <th style="color: #3f51b5;">Изменен</th>
-                                    <th style="color: #3f51b5;">Размер</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="file : ${modifiedFiles}">
-                                    <td class="mdl-data-table__cell--non-numeric" onclick="selectByClick(this)">
-                                        <div class="list-file-data-table">
-                                            <span class="list-file-data-table-title" th:text="|${file.getLeft().getFileName()}|"></span>
-                                            <span class="list-file-data-table-subtitle" th:text="|${file.getLeft().getFilePath()}|"></span>
-                                        </div>
-                                    </td>
-                                    <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
-                                        <div class="list-file-data-table" >
-                                            <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.getLeft().isCloud()},fileTime=${file.getLeft().getModificationDateTime()})}"></div>
-                                            <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.getRight().isCloud()},fileTime=${file.getRight().getModificationDateTime()})}"></div>
-                                        </div>
-                                    </td>
-                                    <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
-                                        <div class="list-file-data-table">
-                                            <span class="list-file-data-table-subtitle" th:text="|${file.getLeft().getModificationDateTime()}|"></span>
-                                            <span class="list-file-data-table-subtitle" th:text="|${file.getRight().getCreationDateTime()}|"></span>
-                                        </div>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                         </div>
-                    </section>
+                    <form id="file-submit" method="post" action="#"
+                          th:action="@{|${urls.UPLOAD_PROJECT}/${project.getId()}|}" th:object="${projectModel}">
+                        <section class="mdl-layout__tab-panel" id="new_tab">
+                            <div class="page-content">
+                                <table class="mdl-data-table mdl-js-data-table "
+                                       style="background-color: transparent; width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th class="mdl-data-table__cell--non-numeric"
+                                            style="color: #3f51b5;text-align: center;"></th>
+                                        <th style="color: #3f51b5;text-align: center;"></th>
+                                        <th style="color: #3f51b5;">Файл</th>
+                                        <th style="color: #3f51b5;">Создан</th>
+                                        <th style="color: #3f51b5;">Изменен</th>
+                                        <th style="color: #3f51b5;">Размер</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="file, itemStat : *{newFileList}">
+                                        <td>
+                                            <input type="checkbox" class="mdl-checkbox__input"
+                                                   th:field="*{newFileList[__${itemStat.index}__].checked}"/>
+                                        </td>
+                                        <td onclick="selectByClick(this)" style="text-align: center;">
+                                            <span class="material-symbols-outlined"
+                                                  style="vertical-align: middle;color: white;font-size: 20px;font-weight: 600;"
+                                                  th:if="${file.isCloud()}">cloud</span>
+                                            <span class="material-symbols-outlined"
+                                                  style="vertical-align: middle;color: white;font-size: 20px;font-weight: 600;"
+                                                  th:if="${!file.isCloud()}">hard_drive_2</span>
+                                        </td>
+                                        <td class="mdl-data-table__cell--non-numeric" onclick="selectByClick(this)">
+                                            <div class="list-file-data-table">
+                                                <span class="list-file-data-table-title"
+                                                      th:text="|${file.getFileName()}|"></span>
+                                                <span class="list-file-data-table-subtitle"
+                                                      th:text="|${file.getFilePath()}|"></span>
+                                            </div>
+                                        </td>
+                                        <td class="list-file-data-table-subtitle" onclick="selectByClick(this)"
+                                            th:text="|${file.getCreationDateTime()}|"></td>
+                                        <td class="list-file-data-table-subtitle" onclick="selectByClick(this)"
+                                            th:text="|${file.getModificationDateTime()}|"></td>
+                                        <td class="list-file-data-table-subtitle">12mb</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                        <section class="mdl-layout__tab-panel" id="modif-tab">
+                            <div class="page-content">
+                                <table class="mdl-data-table mdl-js-data-table "
+                                       style="background-color: transparent; width:100%">
+                                    <thead>
+                                    <tr>
+                                        <th class="mdl-data-table__cell--non-numeric"
+                                            style="color: #3f51b5;text-align: center;"></th>
+                                        <th style="color: #3f51b5;">Файл</th>
+                                        <th style="color: #3f51b5;">Изменен</th>
+                                        <th style="color: #3f51b5;">Размер</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="file, itemStat : *{modifiedNewFileList}">
+                                        <td>
+                                            <input type="checkbox" class="mdl-checkbox__input"
+                                                   th:field="*{modifiedNewFileList[__${itemStat.index}__].checked}"/>
+                                        </td>
+                                        <td class="mdl-data-table__cell--non-numeric" onclick="selectByClick(this)">
+                                            <div class="list-file-data-table" style="text-align: left">
+                                                <span class="list-file-data-table-title"
+                                                      th:text="|${file.getFileName()}|"></span>
+                                                <span class="list-file-data-table-subtitle"
+                                                      th:text="|${file.getFilePath()}|"></span>
+                                            </div>
+                                        </td>
+                                        <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
+                                            <div class="list-file-data-table">
+                                                <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.leftIsCloud()},fileTime=${file.getLeftModificationDateTime()})}"></div>
+                                                <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.rightIsCloud()},fileTime=${file.getRightModificationDateTime()})}"></div>
+                                            </div>
+                                        </td>
+                                        <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
+                                            <div class="list-file-data-table">
+                                                <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.leftIsCloud()},fileTime=${file.getLeftModificationDateTime()})}"></div>
+                                                <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.rightIsCloud()},fileTime=${file.getRightModificationDateTime()})}"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+                    </form>
                 </div>
                 <div class="mdl-cell mdl-cell--2-col"></div>
             </div>
