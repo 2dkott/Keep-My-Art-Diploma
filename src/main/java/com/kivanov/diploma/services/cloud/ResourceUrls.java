@@ -6,4 +6,6 @@ import lombok.Getter;
 @Data
 public class ResourceUrls {
     public String root;
+    public String upload;
+    public String download;
 }
