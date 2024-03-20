@@ -2,10 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="simple-file-table (fileList)">
-    <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable" style="background-color: transparent; width:100%">
+    <table class="mdl-data-table mdl-js-data-table " style="background-color: transparent; width:100%">
         <thead>
         <tr>
             <th class="mdl-data-table__cell--non-numeric" style="color: #3f51b5;text-align: center;"></th>
+            <th style="color: #3f51b5;text-align: center;"></th>
             <th style="color: #3f51b5;">Файл</th>
             <th style="color: #3f51b5;">Создан</th>
             <th style="color: #3f51b5;">Изменен</th>
@@ -13,7 +14,11 @@
         </tr>
         </thead>
         <tbody>
+<!--        <tr th:each="file : ${fileList}" onclick="selectByClick(this)">-->
         <tr th:each="file : ${fileList}">
+            <td>
+                <input type="checkbox" class="mdl-checkbox__input" th:field="*{gender}">
+            </td>
             <td onclick="selectByClick(this)" style="text-align: center;">
                 <span class="material-symbols-outlined"
                       style="vertical-align: middle;color: white;font-size: 20px;font-weight: 600;"
@@ -28,9 +33,9 @@
                     <span class="list-file-data-table-subtitle" th:text="|${file.getFilePath()}|"></span>
                 </div>
             </td>
-            <td class="list-file-data-table-subtitle" onclick="selectByClick(this)" th:text="|${file.getCreationDateTime()}|"></td>
-            <td class="list-file-data-table-subtitle" onclick="selectByClick(this)" th:text="|${file.getModificationDateTime()}|"></td>
-            <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">12mb</td>
+            <td class="list-file-data-table-subtitle" th:text="|${file.getCreationDateTime()}|"></td>
+            <td class="list-file-data-table-subtitle" th:text="|${file.getModificationDateTime()}|"></td>
+            <td class="list-file-data-table-subtitle" >12mb</td>
         </tr>
         </tbody>
     </table>

@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -17,7 +18,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/" + WebUrls.PROJECT)
-@SessionAttributes({"newProjectSession"})
+@SessionAttributes({"newProjectSession","projectModel"})
 public class ProjectController {
 
     @Autowired
@@ -29,8 +30,7 @@ public class ProjectController {
     @Autowired
     SourceService sourceService;
 
-    @Autowired
-    KeepFileModelMapper keepFileModelMapper;
+
 
     @Autowired
     FileRepositoryService fileRepositoryService;
@@ -90,22 +90,17 @@ public class ProjectController {
 
     @GetMapping("/" + WebUrls.SHOW + "/{projectId}")
     public String showProject(@PathVariable("projectId") long projectId,
-                              Model model) throws NoKeepProjectException {
+                              @ModelAttribute("projectModel") KeepProjectModel projectModel,
+                              ModelMap model) throws NoKeepProjectException {
         KeepProject project = projectService.findProjectById(projectId);
         List<KeepSource> sources = project.getKeepSources().stream().toList();
         SyncKeepFileData syncKeepFileData = (SyncKeepFileData) model.getAttribute("syncData");
         model.addAttribute("project", project);
         model.addAttribute("cloudSources", sources);
-        model.addAttribute("files", keepFileModelMapper.mapToKeepFileModelList(fileRepositoryService.getProjectOnlyFiles(project)));
-        List<KeepFile> allList = new ArrayList<>();
-        allList.addAll(syncKeepFileData.getNewLocalFiles());
-        allList.addAll(syncKeepFileData.getNewCloudFiles());
-
-
-        model.addAttribute("allFiles", keepFileModelMapper.mapToKeepFileModelList(allList));
-        model.addAttribute("newLocalFiles", keepFileModelMapper.mapToKeepFileModelList(syncKeepFileData.getNewLocalFiles()));
-        model.addAttribute("newCloudFiles", keepFileModelMapper.mapToKeepFileModelList(syncKeepFileData.getNewCloudFiles()));
-        model.addAttribute("modifiedFiles", keepFileModelMapper.mapToKeepFileModelPairList(syncKeepFileData.getModifiedFiles()));
+        projectModel.resetNewFileListWith(KeepFileModelMapper.mapToKeepFileModelList(syncKeepFileData.getNewCloudFiles()));
+        projectModel.getNewFileList().addAll(KeepFileModelMapper.mapToKeepFileModelList(syncKeepFileData.getNewLocalFiles()));
+        projectModel.resetModifiedNewFileList(KeepFileModelMapper.mapToKeepFileModifiedModelList(syncKeepFileData.getModifiedFiles()));
+        model.addAttribute("projectModel", projectModel);
         return "project";
     }
 
@@ -117,9 +112,50 @@ public class ProjectController {
         return "redirect:/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId;
     }
 
+    @PostMapping("/" + WebUrls.UPLOAD + "/{projectId}")
+    public String uploadProject(@PathVariable("projectId") long projectId,
+                                @ModelAttribute("projectModel") KeepProjectModel projectModel) throws NoKeepProjectException, FileDealingException {
+        KeepProject project = projectService.findProjectById(projectId);
+        List<KeepFile> keepFiles = new ArrayList<>(projectModel.getNewFileList().stream()
+                .filter(KeepFileModel::isChecked)
+                .map(KeepFileModel::getFile)
+                .filter(file -> !file.getSource().isCloud()).toList());
+        keepFiles.addAll(
+                projectModel.getModifiedNewFileList().stream()
+                        .filter(KeepFileModifiedModel::isChecked)
+                        .map(KeepFileModifiedModel::getLeftFile)
+                        .filter(file -> !file.getSource().isCloud()).toList()
+        );
+        fileSyncService.uploadFiles(keepFiles, project.getCloudSource());
+        return "redirect:/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId;
+    }
+
+    @PostMapping("/" + WebUrls.DOWNLOAD + "/{projectId}")
+    public String downloadProject(@PathVariable("projectId") long projectId,
+                                @ModelAttribute("projectModel") KeepProjectModel projectModel) throws NoKeepProjectException {
+        KeepProject project = projectService.findProjectById(projectId);
+        List<KeepFile> keepFiles = new ArrayList<>(projectModel.getNewFileList().stream()
+                .filter(KeepFileModel::isChecked)
+                .map(KeepFileModel::getFile)
+                .filter(file -> file.getSource().isCloud()).toList());
+        keepFiles.addAll(
+                projectModel.getModifiedNewFileList().stream()
+                .filter(KeepFileModifiedModel::isChecked)
+                .map(KeepFileModifiedModel::getRightFile)
+                .filter(file -> file.getSource().isCloud()).toList()
+        );
+        if(!keepFiles.isEmpty()) fileSyncService.downloadFiles(keepFiles, project.getLocalSource());
+        return "redirect:/" + WebUrls.PROJECT + "/" + WebUrls.SHOW + "/" + projectId;
+    }
+
     @ModelAttribute("newProjectSession")
     public NewProjectSession newProjectSession() {
         return new NewProjectSession();
+    }
+
+    @ModelAttribute("projectModel")
+    public KeepProjectModel projectModel() {
+        return new KeepProjectModel();
     }
 
 
@@ -131,6 +167,5 @@ public class ProjectController {
     public SyncKeepFileData syncData() {
         return new SyncKeepFileData();
     }
-
 }
 

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -37,11 +38,13 @@ public class LocalFIleRetrieval {
     private static List<LocalPathFile> collectAndMapChildOfPath(Path rootPath) throws LocalFileReadingException {
         log.info("Reading Path Files from root Path {}", rootPath);
         try {
-            return Lists.newArrayList(Files.newDirectoryStream(rootPath)).stream().map(LocalPathFile::new).toList();
+            if(Files.exists(rootPath)) return Lists.newArrayList(Files.newDirectoryStream(rootPath)).stream().map(LocalPathFile::new).toList();
+            return new ArrayList<>();
         } catch (Exception e) {
             log.error("Reading Path Files from root Path {} was failed", rootPath);
             log.error("");
             throw new LocalFileReadingException(e.getMessage());
         }
     }
+
 }
