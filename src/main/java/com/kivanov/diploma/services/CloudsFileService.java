@@ -7,16 +7,14 @@ import com.kivanov.diploma.services.cloud.CloudFileRetrievalService;
 import com.kivanov.diploma.services.cloud.HttpRequestMaker;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
 import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrieval;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
-public class CloudsFileService implements FileService{
+public class CloudsFileService{
 
     FileRepositoryService fileRepositoryService;
 
@@ -28,7 +26,6 @@ public class CloudsFileService implements FileService{
         retrievalServices.put(SourceType.YANDEX, new YandexFileRetrieval(httpRequestMaker, urlConfiguration));
     }
 
-    @Override
     public void initFindAndSaveAllFiles(KeepSource cloudSources) {
         log.info("Choosing cloud to fetch file data for Source {}", cloudSources);
         retrievalServices.keySet().forEach(cloudFileServiceKey -> {
@@ -50,7 +47,6 @@ public class CloudsFileService implements FileService{
         });
     }
 
-    @Override
     public List<KeepFile> collectKeepFilesByRootFile(KeepFile rootPath, KeepSource keepSource){
         List<KeepFile> keepFileList = new ArrayList<>();
         retrievalServices.keySet().forEach(cloudFileServiceKey -> {
@@ -65,5 +61,44 @@ public class CloudsFileService implements FileService{
             }
         });
         return keepFileList;
+    }
+
+    public void uploadFiles(List<KeepFile> keepFiles, KeepSource keepSource) {
+        retrievalServices.keySet().forEach(cloudFileServiceKey -> {
+            if(cloudFileServiceKey.equals(keepSource.getType())) {
+                CloudFileRetrievalService cloudFileService = retrievalServices.get(cloudFileServiceKey);
+                keepFiles.forEach(keepFile -> {
+                    try {
+                        createParentDirectory(keepFile.getParent(), keepSource, cloudFileService);
+                        cloudFileService.uploadFile(keepFile,keepSource);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        });
+    }
+
+    private void createParentDirectory(KeepFile keepFile, KeepSource keepSource, CloudFileRetrievalService cloudFileService) throws IOException {
+        Optional<KeepFile> cloudDir = fileRepositoryService.findFileByPathIdAndSource(keepFile, keepSource);
+        if(cloudDir.isEmpty()) {
+            createParentDirectory(keepFile.getParent(), keepSource, cloudFileService);
+            cloudFileService.createDirectory(keepFile, keepSource);
+        }
+    }
+
+    public void downloadFiles(@NotEmpty List<KeepFile> keepFiles, KeepSource localKeepSource) {
+        retrievalServices.keySet().forEach(cloudFileServiceKey -> {
+            if(cloudFileServiceKey.equals(keepFiles.get(0).getSource().getType())) {
+                CloudFileRetrievalService cloudFileService = retrievalServices.get(cloudFileServiceKey);
+                keepFiles.forEach(keepFile -> {
+                    try {
+                        cloudFileService.download(keepFile, localKeepSource);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+        });
     }
 }

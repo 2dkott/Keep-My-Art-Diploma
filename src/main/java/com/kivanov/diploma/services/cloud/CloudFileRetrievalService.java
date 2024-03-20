@@ -9,4 +9,7 @@ import java.util.List;
 public interface CloudFileRetrievalService {
 
     List<KeepFile> fetchCLoudFileToKeepFiles(KeepFile keepFileRoot, KeepSource source, boolean flat) throws IOException;
+    void uploadFile(KeepFile keepFile, KeepSource source) throws IOException;
+    void download(KeepFile keepFile, KeepSource source) throws IOException;
+    void createDirectory(KeepFile keepFile, KeepSource source) throws IOException;
 }

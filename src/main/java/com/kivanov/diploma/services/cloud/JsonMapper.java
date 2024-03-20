@@ -16,4 +16,9 @@ public class JsonMapper {
         JsonElement jsonWithFiles = JsonParser.parseString(jsonString).getAsJsonObject().get("_embedded").getAsJsonObject().get("items").getAsJsonArray();
         return gson.fromJson(jsonWithFiles, new TypeToken<ArrayList<YandexFile>>(){}.getType());
     }
+
+    public static String mapJsonToUploadUrl(String jsonString) {
+        JsonElement jsonHref = JsonParser.parseString(jsonString).getAsJsonObject().get("href");
+        return gson.fromJson(jsonHref, String.class);
+    }
 }

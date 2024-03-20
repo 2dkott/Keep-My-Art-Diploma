@@ -43,7 +43,6 @@ public class YandexService {
     public void init() {
         this.service = new ServiceBuilder(apiKey)
                 .apiSecret(apiSecret)
-                .defaultScope(apiScope)
                 .callback("http://localhost:8080/" + WebUrls.OAUTH2_YANDEX)
                 .build(YandexOauthApi20.instance());
     }
