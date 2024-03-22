@@ -6,6 +6,7 @@ import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.services.CloudsFileService;
 import com.kivanov.diploma.services.FileRepositoryService;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,9 @@ public class CloudFileServiceTest {
 
     @Autowired
     UrlConfiguration urlConfiguration;
+
+    @Autowired
+    StandardPBEStringEncryptor encryptor;
 
     private final static String JSON_TEMPLATES_PATH = "json-templates/cloud/yandex/read-file-from-resource/";
     private final static String JSON_PARENT_TEMPLATE = "json-parent.json";
@@ -89,7 +93,7 @@ public class CloudFileServiceTest {
 
         when(fileRepositoryService.saveRoot(yandexSource)).thenReturn(rootKeeFile);
 
-        CloudsFileService cloudsFileService = new CloudsFileService(fileRepositoryService, httpRequestMaker, urlConfiguration);
+        CloudsFileService cloudsFileService = new CloudsFileService(fileRepositoryService, httpRequestMaker, urlConfiguration, encryptor);
         cloudsFileService.initFindAndSaveAllFiles(yandexSource);
 
         ArgumentCaptor<KeepSource> keepSourceArgumentCaptor = ArgumentCaptor.forClass(KeepSource.class);
@@ -152,7 +156,7 @@ public class CloudFileServiceTest {
 
         when(fileRepositoryService.saveRoot(yandexSource)).thenReturn(rootKeeFile);
 
-        CloudsFileService cloudsFileService = new CloudsFileService(fileRepositoryService, httpRequestMaker, urlConfiguration);
+        CloudsFileService cloudsFileService = new CloudsFileService(fileRepositoryService, httpRequestMaker, urlConfiguration, encryptor);
         List<KeepFile> capturedFiles =cloudsFileService.collectKeepFilesByRootFile(rootKeeFile, yandexSource);
 
         KeepFile parentFile = capturedFiles.stream().filter(file -> file.getName().equals(PARENT_TEST_FILE_NAME)).findFirst().orElseThrow();

@@ -2,110 +2,134 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="color-scheme" content="light dark"/>
-    <link rel="stylesheet" th:href="@{/css/pico.min.css}">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="light dark" name="color-scheme"/>
+    <link rel="stylesheet" th:href="@{/material_css/material.min.css}">
+    <script th:src="@{/material_css/material.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/node_modules/material-symbols/index.css}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <title>New Project</title>
-    <style>
-        .outline {
-            --pico-border-width: 0;
-            width: fit-content;
-        }
-
-        #cloud-source-group {
-            margin-bottom: 0;
-        }
-
-        #form-button-fieldset {
-            width: 100px;
-        }
-
-        .invalid_input {
-            background-image: var(--pico-icon-invalid);
-            --pico-border-color: var(--pico-form-element-invalid-border-color);
-            padding-right: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
-            padding-left: var(--pico-form-element-spacing-horizontal);
-            padding-inline-start: var(--pico-form-element-spacing-horizontal) !important;
-            padding-inline-end: calc(var(--pico-form-element-spacing-horizontal) + 1.5rem) !important;
-            background-position: center right 0.75rem;
-            background-size: 1rem auto;
-            background-repeat: no-repeat;
-        }
-
-        .error-text {
-            color: #cc0033;
-            font-family: Helvetica, Arial, sans-serif;
-            font-weight: bold;
-            line-height: 20px;
-        }
-
-        .error-list {
-            list-style-type: circle;
-        }
-    </style>
 </head>
-<script th:inline="javascript" type="text/javascript">
-</script>
-<body>
+<style>
+    .outline {
+        --pico-border-width: 0;
+        width: fit-content;
+    }
 
-<main class="container">
-    <nav>
-        <ul>
-            <li><a href="#">Project</a></li>
-            <li><a href="#">Resources</a></li>
-        </ul>
-    </nav>
-    <section class="pico">
-        <form name="newProjectForm" onsubmit="return onSubmit()" action="#" th:action="@{/project/register}"
-              method="post">
-            <label for="project-name">1. Добавьте имя Вашего проекта:</label>
-            <input id="project-name"
-                   type="text"
-                   name="project-name"
-                   placeholder="Имя Вашего Проекта"
-                   aria-label="Project Local Path"
-                   th:field="*{newProjectSession.projectName}"
-                   th:class="${#fields.hasErrors('newProjectSession.projectName')} ? invalid_input"
-            />
-            <ul class="error-list">
-                <li th:each="err : ${#fields.errors('newProjectSession.projectName')}" th:text="${err}"
-                    class="error-text"/>
-            </ul>
-            <label for="local-path-input">2. Вставьте путь к Вашему проекту </label>
-            <input id="local-path-input"
-                   type="text"
-                   name="local-path"
-                   placeholder="Путь к Вашему проекту"
-                   aria-label="Project Local Path"
-                   th:field="*{newProjectSession.localPath}"
-                   th:class="${#fields.hasErrors('newProjectSession.localPath')} ? invalid_input"
-            />
-            <ul class="error-list">
-                <li th:each="err : ${#fields.errors('newProjectSession.localPath')}" th:text="${err}"
-                    class="error-text"/>
-            </ul>
-            <label for="cloud-source-group">3. Добавьте Ваше облачное хранилище</label>
-            <fieldset id="cloud-source-group">
-                <button class="outline" th:formaction="@{/oauth2/redirect/yandex}">YANDEX DISK</button>
-                <button class="outline" type="button">GOOGLE DISK</button>
-            </fieldset>
-            <ul id="cloud-source-list" >
-                <li  class="grid" th:each="keepSource : ${newProjectSession.getKeepSourceList()}" th:if="${keepSource.isCloud()}">
-                    <p th:text="${keepSource.getUserName()}"></p>
-                    <div></div>
-                    <button  class="outline" th:formaction="@{|${urls.DELETE_SOURCE_FROM_NEW_PROJECT}/${keepSource.getUserName()}|}">&#9932;</button>
-                </li>
-            </ul>
-            <ul class="error-list">
-                <li th:each="err : ${#fields.errors('newProjectSession.keepSourceList')}" th:text="${err}"
-                    class="error-text"/>
-            </ul>
-            <fieldset role="group" id="form-button-fieldset">
-                <button type="submit">Создать</button>
-                <button type="reset">Отмена</button>
-            </fieldset>
-        </form>
-    </section>
-</main>
+    .mdl-textfield {
+        width: 100%;
+    }
+    .mdl-textfield__error {
+        visibility:visible;
+    }
+    .mdl-textfield__input{
+        background-color: #212121;
+        color: white;
+    }
+    .mdl-textfield__label, .cloud-source-list{
+        color: white;
+    }
+
+    .cloud-source-list {
+        padding-left: 15px;
+    }
+
+    .submit-button-group {
+        display: inline-grid;
+        grid-template-columns: auto auto;
+        grid-column-gap: 10px;
+    }
+
+    .cloud-source-list__item {
+        font-size: 16px;
+        color: white;
+        display: inline-grid;
+        grid-template-columns: auto auto;
+        grid-column-gap: 10px;
+        vertical-align: middle;
+    }
+
+    #cloud-source-group {
+        margin-bottom: 0;
+    }
+
+    .error-list {
+        list-style-type: circle;
+    }
+</style>
+<body>
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row">
+                <span class="mdl-layout-title">Новый проект</span>
+                <div class="mdl-layout-spacer"></div>
+                <nav class="mdl-navigation mdl-layout--large-screen-only">
+                    <a class="mdl-navigation__link" th:href="@{|/|}">Home</a>
+                </nav>
+            </div>
+        </header>
+        <main class="mdl-layout__content">
+            <div class="page-content">
+                <div class="mdl-grid">
+                    <div class="mdl-cell mdl-cell--2-col"></div>
+                    <div class="mdl-cell mdl-cell--8-col">
+                        <form name="newProjectForm" onsubmit="return onSubmit()" action="#" th:action="@{/project/register}" method="post" th:object="${newProjectSession}">
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input"
+                                       type="text"
+                                       id="project-name"
+                                       th:field="*{projectName}">
+                                <label class="mdl-textfield__label" for="project-name">Имя Вашего Проекта</label>
+                            </div>
+                            <ul class="error-list">
+                                <li th:each="err : ${#fields.errors('projectName')}">
+                                    <span class="mdl-textfield__error" th:text="${err}"></span>
+                                </li>
+                            </ul>
+                            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                <input class="mdl-textfield__input"
+                                       type="text"
+                                       id="local-path-input"
+                                       th:field="*{localPath}">
+                                <label class="mdl-textfield__label" for="local-path-input">Путь из файловой системы</label>
+                            </div>
+                            <ul class="error-list">
+                                <li th:each="err : ${#fields.errors('localPath')}">
+                                    <span class="mdl-textfield__error" th:text="${err}"></span>
+                                </li>
+
+                            </ul>
+                            <fieldset id="cloud-source-group">
+                                <button class="mdl-button mdl-js-button mdl-button--primary" th:formaction="@{/oauth2/redirect/yandex}">Подключить Яндекс Диск </button>
+                            </fieldset>
+                            <ul class="cloud-source-list">
+                                <li  class="cloud-source-list__item" th:each="keepSource : ${newProjectSession.getKeepSourceList()}">
+                                    <span th:text="|Аккаунт: ${keepSource.getUserName()}|"></span>
+                                    <button class="mdl-button mdl-js-button mdl-button--icon"
+                                            th:formaction="@{|${urls.DELETE_SOURCE_FROM_NEW_PROJECT}/${keepSource.getUserName()}|}">
+                                        <i class="material-symbols-outlined">delete</i>
+                                    </button>
+
+                                </li>
+                            </ul>
+                            <ul class="error-list">
+                                <li th:each="err : ${#fields.errors('keepSourceList')}">
+                                    <span class="mdl-textfield__error" th:text="${err}"></span>
+                                </li>
+                                <li th:each="err : ${#fields.globalErrors()}">
+                                    <span class="mdl-textfield__error" th:text="${err}"></span>
+                                </li>
+                            </ul>
+                            <fieldset class="submit-button-group" id="form-button-fieldset">
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">Создать</button>
+                                <button class="mdl-button mdl-js-button" style="color: white">Отмена</button>
+                            </fieldset>
+                        </form>
+                    </div>
+                    <div class="mdl-cell mdl-cell--2-col"></div>
+                </div>
+            </div>
+        </main>
+    </div>
 </body>
 </html>

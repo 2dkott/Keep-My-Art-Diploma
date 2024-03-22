@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 
 @Controller
-@RequestMapping("home")
+@RequestMapping("")
 public class HomeController {
 
     @Autowired

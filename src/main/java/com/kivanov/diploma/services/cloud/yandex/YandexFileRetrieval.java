@@ -9,6 +9,7 @@ import com.kivanov.diploma.services.cloud.JsonMapper;
 import com.kivanov.diploma.services.cloud.UrlConfiguration;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,12 +23,13 @@ public class YandexFileRetrieval implements CloudFileRetrievalService {
 
     private final HttpRequestMaker httpRequestMaker;
     private final UrlConfiguration urlConfiguration;
+    private final StandardPBEStringEncryptor encoder;
 
     public List<KeepFile> fetchCLoudFileToKeepFiles(KeepFile keepFileRoot, KeepSource source, boolean flat) throws IOException {
         List<KeepFile> fileList = new ArrayList<>();
         ConnectionData connectionData = new ConnectionData();
         connectionData.setUrl(urlConfiguration.getYandex().getRoot() + source.getPath() + keepFileRoot.getPathId());
-        connectionData.setOauthToken(source.getUserToken());
+        connectionData.setOauthToken(encoder.decrypt(source.getUserToken()));
         if (flat) {
             flatSearchAndMapFilesToKeepFileList(connectionData, keepFileRoot, fileList);
         } else {
@@ -70,21 +72,21 @@ public class YandexFileRetrieval implements CloudFileRetrievalService {
     public void uploadFile(KeepFile keepFile, KeepSource cloudKeepSource) throws IOException {
         ConnectionData connectionData = new ConnectionData();
         connectionData.setUrl(urlConfiguration.getYandex().upload + cloudKeepSource.getPath() + keepFile.getPathId());
-        connectionData.setOauthToken(cloudKeepSource.getUserToken());
+        connectionData.setOauthToken(encoder.decrypt(cloudKeepSource.getUserToken()));
         httpRequestMaker.sendFile(connectionData.getUrl(), connectionData.getOauthToken(), new File(keepFile.getSource().getPath() + "/" + keepFile.getPathId()));
     }
 
     public void download(KeepFile keepFile, KeepSource localKeepSource) throws IOException {
         ConnectionData connectionData = new ConnectionData();
         connectionData.setUrl(urlConfiguration.getYandex().download + keepFile.getSource().getPath() + keepFile.getPathId());
-        connectionData.setOauthToken(keepFile.getSource().getUserToken());
+        connectionData.setOauthToken(encoder.decrypt(keepFile.getSource().getUserToken()));
         httpRequestMaker.getFile(connectionData.getUrl(), connectionData.getOauthToken(), new File(localKeepSource.getPath() + "/" + keepFile.getPathId()));
     }
 
     public void createDirectory(KeepFile keepFile, KeepSource cloudKeepSource) throws IOException {
         ConnectionData connectionData = new ConnectionData();
         connectionData.setUrl(urlConfiguration.getYandex().getRoot() + cloudKeepSource.getPath() + keepFile.getPathId());
-        connectionData.setOauthToken(cloudKeepSource.getUserToken());
+        connectionData.setOauthToken(encoder.decrypt(cloudKeepSource.getUserToken()));
         httpRequestMaker.createDirectory(connectionData.getUrl(), connectionData.getOauthToken());
     }
 }

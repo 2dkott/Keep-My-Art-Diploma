@@ -5,6 +5,7 @@ import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.cloud.yandex.YandexService;
 import com.kivanov.diploma.services.cloud.yandex.YandexUserInfo;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -22,18 +23,20 @@ public class OauthController {
     @Autowired
     YandexService yandexService;
 
+    @Autowired
+    StandardPBEStringEncryptor encryptor;
+
     @Value("${services.api.yandex.app_path}")
     private String appPath;
 
     @GetMapping("/" + WebUrls.YANDEX)
     public RedirectView getAuthCodeFromYandex(@RequestParam("code") String code,
                                               @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) throws IOException, ExecutionException, InterruptedException {
-
         yandexService.doOauth(code);
         YandexUserInfo yandexUserInfo = yandexService.getUserInfo(yandexService.getOauthToken());
         KeepSource keepSource = new KeepSource();
         keepSource.setType(SourceType.YANDEX);
-        keepSource.setUserToken(yandexService.getOauthToken());
+        keepSource.setUserToken(encryptor.encrypt(yandexService.getOauthToken()));
         keepSource.setUserName(yandexUserInfo.getLogin());
         keepSource.setPath(appPath);
         keepSource.setClone(false);

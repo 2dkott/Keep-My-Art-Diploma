@@ -9,6 +9,7 @@ import com.kivanov.diploma.services.cloud.UrlConfiguration;
 import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrieval;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.extern.slf4j.Slf4j;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 
 import java.io.IOException;
 import java.util.*;
@@ -21,9 +22,12 @@ public class CloudsFileService{
     Map<SourceType, CloudFileRetrievalService> retrievalServices = new HashMap<>();
 
 
-    public CloudsFileService(FileRepositoryService fileRepositoryService, HttpRequestMaker httpRequestMaker, UrlConfiguration urlConfiguration) {
+    public CloudsFileService(FileRepositoryService fileRepositoryService,
+                             HttpRequestMaker httpRequestMaker,
+                             UrlConfiguration urlConfiguration,
+                             StandardPBEStringEncryptor encryptor) {
         this.fileRepositoryService = fileRepositoryService;
-        retrievalServices.put(SourceType.YANDEX, new YandexFileRetrieval(httpRequestMaker, urlConfiguration));
+        retrievalServices.put(SourceType.YANDEX, new YandexFileRetrieval(httpRequestMaker, urlConfiguration, encryptor));
     }
 
     public void initFindAndSaveAllFiles(KeepSource cloudSources) {
