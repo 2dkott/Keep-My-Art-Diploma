@@ -30,7 +30,7 @@ public class KeepSource {
     @JoinColumn(name = "project_id")
     private KeepProject project;
 
-    @OneToMany(mappedBy = "source",cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "source",cascade=CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval = true)
     private List<KeepFile> keepSources;
 
     @Column

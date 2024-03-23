@@ -9,9 +9,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -64,6 +67,10 @@ public class ProjectController {
     public String registerNewProject(Model model,
                                      @Valid @ModelAttribute("newProjectSession") NewProjectSession newProjectSession,
                                      BindingResult result) {
+        if(!Files.exists(Path.of(newProjectSession.getLocalPath()))) {
+            ObjectError error = new ObjectError("globalError", "Такой в путь в файловой системе не существует!");
+            result.addError(error);
+        }
         if (result.hasErrors()) {
             return "new-project";
         }
@@ -85,7 +92,13 @@ public class ProjectController {
 
         sourceService.saveKeepSources(keepSources);
 
-        return "home";
+        return "redirect:/";
+    }
+
+    @GetMapping("/" + WebUrls.DELETE + "/{projectId}")
+    public String deleteProject(@PathVariable("projectId") long projectId) throws NoKeepProjectException {
+        projectService.deleteProjectById(projectId);
+        return "redirect:/";
     }
 
     @GetMapping("/" + WebUrls.SHOW + "/{projectId}")

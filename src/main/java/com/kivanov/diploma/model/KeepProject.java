@@ -21,7 +21,7 @@ public class KeepProject {
     @Column
     private LocalDateTime creationTime;
 
-    @OneToMany(mappedBy = "project",cascade=CascadeType.ALL, fetch=FetchType.LAZY)
+    @OneToMany(mappedBy = "project",cascade=CascadeType.ALL, fetch=FetchType.LAZY, orphanRemoval = true)
     private List<KeepSource> keepSources;
 
     public KeepSource getLocalSource() {

@@ -69,6 +69,13 @@
         vertical-align: middle;
     }
 
+    .list-project-data-container {
+        margin-left: 10px;
+        display: inline-grid;
+        grid-template-columns: auto;
+        grid-column-gap: 5px;
+    }
+
     .list-file-data-container {
         display: inline-grid;
         grid-template-columns: auto auto;
@@ -141,17 +148,17 @@
     <header class="mdl-layout__header">
         <div class="mdl-layout__header-row">
             <span class="mdl-layout-title" th:text="${project.getName()}">Проекты</span>
-            <ul>
-                <li th:text="|Локальное хранилище: ${project.getLocalSource().getPath()}|"></li>
-                <li th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></li>
-            </ul>
+            <div class="list-project-data-container">
+                <span th:text="|Файловая система: ${project.getLocalSource().getPath()}|"></span>
+                <span th:text="|Облачное хранилище: @${project.getCloudSource().getUserName()}|"></span>
+            </div>
             <div class="mdl-layout-spacer"></div>
             <nav class="mdl-navigation mdl-layout--large-screen-only">
-                <a class="mdl-navigation__link" th:href="@{|/${urls.HOME}|}">Home</a>
+                <a class="mdl-navigation__link" th:href="@{|/|}">Home</a>
             </nav>
         </div>
         <div class="mdl-layout__tab-bar mdl-js-ripple-effect" id="tab-container">
-            <a class="mdl-layout__tab" href="#new_tab" onclick="resetCheckedInbox()">Новые</a>
+            <a class="mdl-layout__tab is-active" href="#new_tab" onclick="resetCheckedInbox()">Новые</a>
             <a class="mdl-layout__tab" href="#modif-tab" onclick="resetCheckedInbox()">Измененные</a>
             <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
                     style="display: flex;justify-content: center;align-items: center;"
