@@ -124,8 +124,8 @@ public class ProjectController {
     }
 
     @PostMapping("/" + WebUrls.UPLOAD + "/{projectId}")
-    public String uploadProject(@PathVariable("projectId") long projectId,
-                                @ModelAttribute("projectModel") KeepProjectModel projectModel) throws NoKeepProjectException, FileDealingException {
+    public String uploadFilesInProject(@PathVariable("projectId") long projectId,
+                                       @ModelAttribute("projectModel") KeepProjectModel projectModel) throws NoKeepProjectException, FileDealingException {
         KeepProject project = projectService.findProjectById(projectId);
         List<KeepFile> keepFiles = new ArrayList<>(projectModel.getNewFileList().stream()
                 .filter(KeepFileModel::isChecked)
@@ -142,8 +142,8 @@ public class ProjectController {
     }
 
     @PostMapping("/" + WebUrls.DOWNLOAD + "/{projectId}")
-    public String downloadProject(@PathVariable("projectId") long projectId,
-                                @ModelAttribute("projectModel") KeepProjectModel projectModel) throws NoKeepProjectException {
+    public String downloadFilesInProject(@PathVariable("projectId") long projectId,
+                                         @ModelAttribute("projectModel") KeepProjectModel projectModel) throws NoKeepProjectException {
         KeepProject project = projectService.findProjectById(projectId);
         List<KeepFile> keepFiles = new ArrayList<>(projectModel.getNewFileList().stream()
                 .filter(KeepFileModel::isChecked)
