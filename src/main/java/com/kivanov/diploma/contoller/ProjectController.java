@@ -1,4 +1,4 @@
-package com.kivanov.diploma.contollers;
+package com.kivanov.diploma.contoller;
 
 import com.kivanov.diploma.model.*;
 import com.kivanov.diploma.services.*;
@@ -30,8 +30,6 @@ public class ProjectController {
     @Autowired
     SourceService sourceService;
 
-
-
     @Autowired
     FileRepositoryService fileRepositoryService;
 
@@ -61,8 +59,7 @@ public class ProjectController {
 
 
     @PostMapping("/" + WebUrls.REGISTER)
-    public String registerNewProject(Model model,
-                                     @Valid @ModelAttribute("newProjectSession") NewProjectSession newProjectSession,
+    public String registerNewProject(@Valid @ModelAttribute("newProjectSession") NewProjectSession newProjectSession,
                                      BindingResult result) {
         if (result.hasErrors()) {
             return "new-project";

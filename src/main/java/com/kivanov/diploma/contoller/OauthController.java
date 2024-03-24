@@ -1,4 +1,4 @@
-package com.kivanov.diploma.contollers;
+package com.kivanov.diploma.contoller;
 
 import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;

@@ -1,4 +1,4 @@
-package com.kivanov.diploma.contollers;
+package com.kivanov.diploma.contoller;
 
 import com.kivanov.diploma.model.WebUrls;
 import com.kivanov.diploma.services.ProjectService;
