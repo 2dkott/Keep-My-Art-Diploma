@@ -33,8 +33,6 @@ public class ProjectController {
     @Autowired
     SourceService sourceService;
 
-
-
     @Autowired
     FileRepositoryService fileRepositoryService;
 
@@ -171,11 +169,11 @@ public class ProjectController {
         return new KeepProjectModel();
     }
 
-
     @ModelAttribute("urls")
     public WebUrls urls() {
         return new WebUrls();
     }
+
     @ModelAttribute("syncData")
     public SyncKeepFileData syncData() {
         return new SyncKeepFileData();
