@@ -203,7 +203,6 @@
                                         <th style="color: #3f51b5;">Файл</th>
                                         <th style="color: #3f51b5;">Создан</th>
                                         <th style="color: #3f51b5;">Изменен</th>
-                                        <th style="color: #3f51b5;">Размер</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -232,7 +231,6 @@
                                             th:text="|${file.getCreationDateTime()}|"></td>
                                         <td class="list-file-data-table-subtitle" onclick="selectByClick(this)"
                                             th:text="|${file.getModificationDateTime()}|"></td>
-                                        <td class="list-file-data-table-subtitle">12mb</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -248,7 +246,6 @@
                                             style="color: #3f51b5;text-align: center;"></th>
                                         <th style="color: #3f51b5;">Файл</th>
                                         <th style="color: #3f51b5;">Изменен</th>
-                                        <th style="color: #3f51b5;">Размер</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -263,12 +260,6 @@
                                                       th:text="|${file.getFileName()}|"></span>
                                                 <span class="list-file-data-table-subtitle"
                                                       th:text="|${file.getFilePath()}|"></span>
-                                            </div>
-                                        </td>
-                                        <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
-                                            <div class="list-file-data-table">
-                                                <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.leftIsCloud()},fileTime=${file.getLeftModificationDateTime()})}"></div>
-                                                <div th:replace="~{fragments/general.html :: file-time-data(isCloud=${file.rightIsCloud()},fileTime=${file.getRightModificationDateTime()})}"></div>
                                             </div>
                                         </td>
                                         <td class="list-file-data-table-subtitle" onclick="selectByClick(this)">
