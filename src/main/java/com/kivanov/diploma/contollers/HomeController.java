@@ -18,7 +18,7 @@ public class HomeController {
     ProjectService projectService;
 
     @GetMapping
-    public String home(Model model) {
+    public String getHome(Model model) {
         model.addAttribute("projects", projectService.getAllKeepProjects());
         return "home";
     }

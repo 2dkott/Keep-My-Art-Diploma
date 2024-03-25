@@ -6,6 +6,7 @@ import com.kivanov.diploma.model.KeepSource;
 import com.kivanov.diploma.model.SourceType;
 import com.kivanov.diploma.services.FileRepositoryService;
 import com.kivanov.diploma.services.cloud.yandex.YandexFileRetrieval;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class YandexFileRetrievalTest {
 
     @Autowired
     UrlConfiguration urlConfiguration;
+
+    @Autowired
+    StandardPBEStringEncryptor encoder;
 
     private final static String JSON_TEMPLATES_PATH = "json-templates/cloud/yandex/read-file-from-resource/";
     private final static String JSON_PARENT_TEMPLATE = "json-parent.json";
@@ -79,11 +83,11 @@ public class YandexFileRetrievalTest {
     @Test
     public void testFetchCLoudFileToKeepFiles() throws IOException {
 
-        YandexFileRetrieval yandexFileRetrieval = new YandexFileRetrieval(httpRequestMaker, urlConfiguration);
+        YandexFileRetrieval yandexFileRetrieval = new YandexFileRetrieval(httpRequestMaker, urlConfiguration, encoder);
         KeepSource yandexSource = new KeepSource();
         yandexSource.setType(SourceType.YANDEX);
         yandexSource.setPath(PARENT_URL);
-        yandexSource.setUserToken(TOKEN);
+        yandexSource.setUserToken(encoder.encrypt(TOKEN));
         KeepFile rootKeeFile = KeepFile.Root(yandexSource);
 
         List<KeepFile> actualFileList = yandexFileRetrieval.fetchCLoudFileToKeepFiles(rootKeeFile, yandexSource, false);
@@ -124,11 +128,11 @@ public class YandexFileRetrievalTest {
     @Test
     public void testFlatFetchCLoudFileToKeepFiles() throws IOException {
 
-        YandexFileRetrieval yandexFileRetrieval = new YandexFileRetrieval(httpRequestMaker, urlConfiguration);
+        YandexFileRetrieval yandexFileRetrieval = new YandexFileRetrieval(httpRequestMaker, urlConfiguration, encoder);
         KeepSource yandexSource = new KeepSource();
         yandexSource.setType(SourceType.YANDEX);
         yandexSource.setPath(PARENT_URL);
-        yandexSource.setUserToken(TOKEN);
+        yandexSource.setUserToken(encoder.encrypt(TOKEN));
         KeepFile rootKeeFile = KeepFile.Root(yandexSource);
 
         List<KeepFile> actualFileList = yandexFileRetrieval.fetchCLoudFileToKeepFiles(rootKeeFile, yandexSource, true);

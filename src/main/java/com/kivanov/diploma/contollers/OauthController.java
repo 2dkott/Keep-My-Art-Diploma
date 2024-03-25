@@ -46,7 +46,7 @@ public class OauthController {
     }
 
     @PostMapping("/" + WebUrls.REDIRECT + "/{cloud-name}")
-    public RedirectView redirect(@PathVariable("cloud-name") String cloudName, @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) {
+    public RedirectView redirectToCloudOauthService(@PathVariable("cloud-name") String cloudName, @ModelAttribute("newProjectSession") NewProjectSession newProjectSession) {
         if (cloudName.equals(WebUrls.YANDEX)) return new RedirectView(yandexService.getAuthorizationUrl());
         return null;
     }

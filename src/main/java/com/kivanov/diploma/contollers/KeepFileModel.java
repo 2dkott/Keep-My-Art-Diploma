@@ -15,6 +15,15 @@ public class KeepFileModel {
         return file.getSource().isCloud();
     }
 
+    public String getCreationDateTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return Objects.nonNull(file.getCreationDateTime()) ? file.getCreationDateTime().format(formatter) : "";
+    }
+
+    public String getModificationDateTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return Objects.nonNull(file.getModifiedDateTime()) ? file.getCreationDateTime().format(formatter) : "";
+    }
 
     public String getFileName() {
         return file.getName();
@@ -23,5 +32,7 @@ public class KeepFileModel {
     public String getFilePath() {
         return file.getPathId();
     }
+
+
 
 }
