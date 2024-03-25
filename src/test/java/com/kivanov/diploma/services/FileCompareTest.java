@@ -81,6 +81,7 @@ public class FileCompareTest {
                     if(Objects.nonNull(keepFile.getParent())) return keepFile.getParent().getName().equals(right.getName());
                     else return false;
                 }).toList(),
+                (leftFile, rightFile) -> leftFile.getSha256().equals(rightFile.getSha256()),
                 lists.getLeft().get(0),
                 lists.getRight().get(0),
                 source

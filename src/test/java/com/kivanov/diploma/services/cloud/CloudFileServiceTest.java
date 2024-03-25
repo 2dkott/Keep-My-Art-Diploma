@@ -88,7 +88,7 @@ public class CloudFileServiceTest {
         KeepSource yandexSource = new KeepSource();
         yandexSource.setType(SourceType.YANDEX);
         yandexSource.setPath(PARENT_URL);
-        yandexSource.setUserToken(TOKEN);
+        yandexSource.setUserToken(encryptor.encrypt(TOKEN));
         KeepFile rootKeeFile = KeepFile.Root(yandexSource);
 
         when(fileRepositoryService.saveRoot(yandexSource)).thenReturn(rootKeeFile);
@@ -151,7 +151,7 @@ public class CloudFileServiceTest {
         KeepSource yandexSource = new KeepSource();
         yandexSource.setType(SourceType.YANDEX);
         yandexSource.setPath(PARENT_URL);
-        yandexSource.setUserToken(TOKEN);
+        yandexSource.setUserToken(encryptor.encrypt(TOKEN));
         KeepFile rootKeeFile = KeepFile.Root(yandexSource);
 
         when(fileRepositoryService.saveRoot(yandexSource)).thenReturn(rootKeeFile);
