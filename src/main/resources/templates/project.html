@@ -162,19 +162,31 @@
             <a class="mdl-layout__tab" href="#modif-tab" onclick="resetCheckedInbox()">Измененные</a>
             <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
                     style="display: flex;justify-content: center;align-items: center;"
-                    th:onclick="'syncProject(' + ${project.getId()} + ')'">
+                    th:onclick="'syncProject(' + ${project.getId()} + ')'"
+                    id="sync-button">
                 <i class="material-symbols-outlined">sync</i>
+                <div class="mdl-tooltip" data-mdl-for="sync-button">
+                    Синхронизировать
+                </div>
             </button>
             <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
                     style="display: flex;justify-content: center;align-items: center;"
-                    type="submit" form="file-submit">
+                    type="submit" form="file-submit"
+                    id="upload-button">
                 <i class="material-symbols-outlined">cloud_upload</i>
+                <div class="mdl-tooltip" data-mdl-for="upload-button">
+                    Загрузить в облачное хранилище
+                </div>
             </button>
             <button class="mdl-layout__tab mdl-button mdl-js-button mdl-button--accent"
                     style="display: flex;justify-content: center;align-items: center;"
                     th:formaction="@{|${urls.DOWNLOAD_PROJECT}/${project.getId()}|}"
-                    form="file-submit">
+                    form="file-submit"
+                    id="download-button">
                 <i class="material-symbols-outlined">cloud_download</i>
+                <div class="mdl-tooltip" data-mdl-for="download-button">
+                    Скачать из облачного хранилища
+                </div>
             </button>
         </div>
     </header>
